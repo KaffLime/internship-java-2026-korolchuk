@@ -6,7 +6,6 @@ import com.example.internshipjava2026korolchuk.repository.EmployeeRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -21,7 +20,7 @@ public class EmployeeService {
         ArrayList<Employee> employees = (ArrayList<Employee>) employeeRepository.findAll();
         ArrayList<EmployeeDto> employeeDtos = new ArrayList<>();
 
-        for (Employee employee : employees) {
+        for(Employee employee : employees) {
             employeeDtos.add(employeeMapper.toDto(employee));
         }
 

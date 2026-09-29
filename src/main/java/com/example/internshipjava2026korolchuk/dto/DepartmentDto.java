@@ -1,15 +1,14 @@
 package com.example.internshipjava2026korolchuk.dto;
 
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
-public record DepartmentDto(
-        Long id,
-
-        @NotNull
-        String name,
-
-        @Size(min = 3, max = 10, message = "Длина кода должна составлять от 3 до 10 символов")
-        String code
-) {
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+public class DepartmentDto {
+    Long id;
+    String name;
+    String code;
 }
