@@ -7,9 +7,7 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToOne;
-import jakarta.persistence.PrimaryKeyJoinColumn;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
@@ -32,8 +30,8 @@ public class RequestHistory {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Long id;
 
+    @Column(name = "travel_request_id")
     @OneToOne
-    @JoinColumn(name = "travel_request_id", referencedColumnName = "id")
     TravelRequest travelRequest;
 
     @Column(name = "old_status")
