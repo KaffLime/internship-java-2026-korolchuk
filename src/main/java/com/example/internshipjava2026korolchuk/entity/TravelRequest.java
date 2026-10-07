@@ -35,13 +35,11 @@ public class TravelRequest {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Long id;
 
-    @Column(name = "employee_id")
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "employee_id", referencedColumnName = "id")
     @ToString.Exclude
     Employee employee;
 
-    @Column(name = "department_id")
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "department_id", referencedColumnName = "id")
     @ToString.Exclude

@@ -42,7 +42,6 @@ public class Employee {
     @Column(name = "position")
     String position;
 
-    @Column(name = "department_id")
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "department_id", referencedColumnName = "id")
     @ToString.Exclude
