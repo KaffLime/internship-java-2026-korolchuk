@@ -4,75 +4,73 @@ import com.example.internshipjava2026korolchuk.entity.Department;
 import com.example.internshipjava2026korolchuk.entity.Employee;
 import com.example.internshipjava2026korolchuk.repository.DepartmentRepository;
 import com.example.internshipjava2026korolchuk.repository.EmployeeRepository;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
+import org.springframework.boot.jdbc.test.autoconfigure.AutoConfigureTestDatabase;
+import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.springframework.test.context.ActiveProfiles;
+import org.testcontainers.containers.PostgreSQLContainer;
+import org.testcontainers.junit.jupiter.Container;
+import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @DataJpaTest
+@Testcontainers
+@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @ActiveProfiles("test")
 public class EmployeeRepositoryTest {
+    @Container
+    @ServiceConnection
+    static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:15");
+
     @Autowired
     private EmployeeRepository employeeRepository;
 
     @Autowired
     private DepartmentRepository departmentRepository;
 
-    private Employee dbEmp;
-    private Department dbDep;
-
-    @BeforeEach
-    void init() {
-        employeeRepository.deleteAll();
-        departmentRepository.deleteAll();
-
-        Department dep = new Department(null, "OGT", "5125");
-        dbDep = departmentRepository.save(dep);
-
-        Employee emp = new Employee(null, "Artyom Korolchuk",
-                "artem@mail.ru", "injener", dbDep, LocalDate.now());
-        dbEmp = employeeRepository.save(emp);
-    }
-
     @Test
-    void shouldSaveEmployee() {
-        Employee newEmp = new Employee(null, "Egor Kartashov",
-                "kart@mail.ru", "buhgalter", dbDep, LocalDate.now());
+    void shouldUpdateEmployee() {
+        Department dep = departmentRepository.findById(-2L).get();
+
+        Employee newEmp = new Employee(-1L, "Карташов Егор Акакьевич",
+                "kart@mail.ru", "Бухгалтер", dep, LocalDate.now());
         Employee savedEmp = employeeRepository.save(newEmp);
 
         assertEquals(newEmp.getFullName(), savedEmp.getFullName());
-        assertNotNull(savedEmp.getId());
-        assertEquals(2, employeeRepository.count());
+        assertNotEquals("artem@mail.ru", savedEmp.getEmail());
+        assertEquals("Бухгалтер", savedEmp.getPosition());
     }
 
     @Test
     void shouldFindAllEmployees() {
         List<Employee> empList = employeeRepository.findAll();
 
-        assertEquals(1, empList.size());
+        assertEquals(3, empList.size());
         assertNotNull(empList.get(0));
+        assertTrue(empList.stream().anyMatch(x -> x.getEmail().equals("artem@mail.ru")));
     }
 
     @Test
     void shouldDeleteEmployee() {
-        employeeRepository.delete(dbEmp);
+        employeeRepository.deleteById(-1L);
 
-        assertEquals(0, employeeRepository.count());
+        assertEquals(2, employeeRepository.count());
+        assertTrue(employeeRepository.findById(-1L).isEmpty());
     }
 
     @Test
     void shouldNotFindEmployee() {
-        Employee savedEmp = employeeRepository.findAll().get(0);
-        Optional<Employee> emp = employeeRepository.findById(savedEmp.getId() + 1);
+        Optional<Employee> emp = employeeRepository.findById(-50L);
 
         assertTrue(emp.isEmpty());
     }

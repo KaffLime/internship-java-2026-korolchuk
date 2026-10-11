@@ -1,0 +1,30 @@
+databaseChangeLog:
+  - changeSet:
+      id: insert-departments
+      author: artem
+      context: test
+      changes:
+        - insert:
+            tableName: departments
+            columns:
+              - column:
+                  name: id
+                  valueNumeric: -1
+              - column:
+                  name: name
+                  value: 'OGT'
+              - column:
+                  name: code
+                  value: '5555'
+        - insert:
+            tableName: departments
+            columns:
+              - column:
+                  name: id
+                  valueNumeric: -2
+              - column:
+                  name: name
+                  value: 'BUH'
+              - column:
+                  name: code
+                  value: '1234'

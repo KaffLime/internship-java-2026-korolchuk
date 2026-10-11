@@ -1,0 +1,54 @@
+databaseChangeLog:
+  - changeSet:
+      id: create-requests-history-table
+      author: artem
+      changes:
+        - createTable:
+            tableName: requests_history
+            remarks: история заявок
+            columns:
+              - column:
+                  name: id
+                  type: bigint
+                  autoIncrement: true
+                  constraints:
+                    nullable: false
+              - column:
+                  name: travel_request_id
+                  type: bigint
+                  constraints:
+                    nullable: false
+              - column:
+                  name: old_status
+                  type: varchar(32)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: new_status
+                  type: varchar(32)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: changed_at
+                  type: timestamp
+                  defaultValueComputed: NOW()
+                  constraints:
+                    nullable: false
+              - column:
+                  name: comment
+                  type: text
+        - addForeignKeyConstraint:
+            baseTableName: requests_history
+            baseColumnNames: travel_request_id
+            referencedTableName: travel_requests
+            referencedColumnNames: id
+            constraintName: fk_requests_history_travel_request_id_travel_requests
+            onDelete: CASCADE
+            onUpdate: RESTRICT
+        - sql:
+            sql: |
+              ALTER TABLE requests_history ADD CONSTRAINT check_requests_history_oldStatus_newStatus
+              CHECK (
+                old_status IN ('DRAFT', 'SUBMITTED', 'APPROVED', 'REJECTED', 'CANCELLED') AND
+                new_status IN ('DRAFT', 'SUBMITTED', 'APPROVED', 'REJECTED', 'CANCELLED')
+              )

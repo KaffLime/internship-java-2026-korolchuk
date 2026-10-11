@@ -1,0 +1,93 @@
+databaseChangeLog:
+  - changeSet:
+      id: create-travel-requests-table
+      author: artem
+      changes:
+        - sql:
+            splitStatements: false
+            sql: |
+              CREATE OR REPLACE FUNCTION get_current_timestamp_for_updated_at()
+              RETURNS TRIGGER AS $$
+              BEGIN
+                NEW.updated_at = NOW();
+                RETURN NEW;
+              END;
+              $$ language plpgsql;
+        - createTable:
+            tableName: travel_requests
+            remarks: заявки на командировку
+            columns:
+              - column:
+                  name: id
+                  type: bigint
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    primaryKeyName: pk_travel_requests
+                    nullable: false
+              - column:
+                  name: employee_id
+                  type: bigint
+                  constraints:
+                    nullable: false
+              - column:
+                  name: department_id
+                  type: bigint
+                  constraints:
+                    nullable: false
+              - column:
+                  name: destination
+                  type: text
+              - column:
+                  name: start_date
+                  type: date
+              - column:
+                  name: end_date
+                  type: date
+              - column:
+                  name: purpose
+                  type: varchar(500)
+              - column:
+                  name: status
+                  type: varchar(32)
+                  defaultValue: 'DRAFT'
+                  constraints:
+                    nullable: false
+              - column:
+                  name: created_at
+                  type: timestamp
+                  defaultValueComputed: NOW()
+                  constraints:
+                    nullable: false
+              - column:
+                  name: updated_at
+                  type: timestamp
+                  defaultValueComputed: NOW()
+                  constraints:
+                    nullable: false
+              - column:
+                  name: estimated_cost
+                  type: numeric
+        - sql:
+            splitStatements: false
+            sql: |
+              CREATE TRIGGER update_updated_at
+              BEFORE UPDATE ON travel_requests
+              FOR EACH ROW
+              EXECUTE FUNCTION get_current_timestamp_for_updated_at();
+        - sql:
+            sql: |
+              ALTER TABLE travel_requests ADD CONSTRAINT check_travel_requests_status
+              CHECK (status IN ('DRAFT', 'SUBMITTED', 'APPROVED', 'REJECTED', 'CANCELLED'))
+        - sql:
+            sql: |
+              ALTER TABLE travel_requests ADD CONSTRAINT check_travel_requests_start_date_end_date
+              CHECK (end_date >= start_date)
+        - sql:
+            sql: |
+              ALTER TABLE travel_requests ADD CONSTRAINT check_travel_requests_purpose
+              CHECK (char_length(purpose) >= 10)
+        - sql:
+            sql: |
+              ALTER TABLE travel_requests ADD CONSTRAINT check_travel_requests_estimated_cost
+              CHECK (estimated_cost >= 0.0)

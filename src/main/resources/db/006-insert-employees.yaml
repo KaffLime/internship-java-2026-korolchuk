@@ -1,0 +1,69 @@
+databaseChangeLog:
+  - changeSet:
+      id: insert-employees
+      author: artem
+      context: test
+      changes:
+        - insert:
+            tableName: employees
+            columns:
+              - column:
+                  name: id
+                  valueNumeric: -1
+              - column:
+                  name: full_name
+                  value: 'Корольчук Артем Сергеевич'
+              - column:
+                  name: email
+                  value: 'artem@mail.ru'
+              - column:
+                  name: position
+                  value: 'Инженер'
+              - column:
+                  name: department_id
+                  valueNumeric: -1
+              - column:
+                  name: hire_date
+                  valueDate: '2026-01-05'
+        - insert:
+            tableName: employees
+            columns:
+              - column:
+                  name: id
+                  valueNumeric: -2
+              - column:
+                  name: full_name
+                  value: 'Иванов Иван Иванович'
+              - column:
+                  name: email
+                  value: 'ivan34@mail.ru'
+              - column:
+                  name: position
+                  value: 'Бухгалтер'
+              - column:
+                  name: department_id
+                  valueNumeric: -2
+              - column:
+                  name: hire_date
+                  valueDate: '2026-02-07'
+        - insert:
+            tableName: employees
+            columns:
+              - column:
+                  name: id
+                  valueNumeric: -3
+              - column:
+                  name: full_name
+                  value: 'Васнецова Светлана Викторовна'
+              - column:
+                  name: email
+                  value: 'svetik@gmail.com'
+              - column:
+                  name: position
+                  value: 'Главный бухгалтер'
+              - column:
+                  name: department_id
+                  valueNumeric: -2
+              - column:
+                  name: hire_date
+                  valueDate: '2025-08-21'

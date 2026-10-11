@@ -1,0 +1,9 @@
+#Скопируйте эти значения в application-dev.properties при необходимости
+#Запускайте с профилем dev
+
+#для запуска changesets с контекстом dev
+spring.liquibase.contexts=dev
+
+#для изменения и тестирования changesets во время разработки
+spring.liquibase.clear-checksums=true
+spring.liquibase.drop-first=true

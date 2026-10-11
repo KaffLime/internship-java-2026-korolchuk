@@ -1,0 +1,31 @@
+databaseChangeLog:
+  - changeSet:
+      id: create-departments-table
+      author: artem
+      changes:
+        - createTable:
+            tableName: departments
+            remarks: отделы
+            columns:
+              - column:
+                  name: id
+                  type: bigint
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    primaryKeyName: pk_departments
+                    nullable: false
+              - column:
+                  name: name
+                  type: text
+                  constraints:
+                    nullable: false
+              - column:
+                  name: code
+                  type: varchar(10)
+                  constraints:
+                    unique: true
+        - sql:
+            sql: |
+              ALTER TABLE departments ADD CONSTRAINT check_departments_code
+              CHECK (char_length(code) >= 3)

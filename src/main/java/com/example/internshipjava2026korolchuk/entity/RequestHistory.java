@@ -4,19 +4,24 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.OneToOne;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.ToString;
+import org.hibernate.annotations.ColumnDefault;
+import org.hibernate.annotations.Generated;
+import org.hibernate.generator.EventType;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "requests_history")
@@ -31,8 +36,9 @@ public class RequestHistory {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Long id;
 
-    @OneToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "travel_request_id", referencedColumnName = "id")
+    @ToString.Exclude
     TravelRequest travelRequest;
 
     @Column(name = "old_status")
@@ -43,8 +49,10 @@ public class RequestHistory {
     @Enumerated(EnumType.STRING)
     TravelRequestStatus newStatus;
 
-    @Column(name = "changed_at")
-    LocalDate changedAt;
+    @Column(name = "changed_at", insertable = false, updatable = false)
+    @Generated(event = EventType.INSERT)
+    @ColumnDefault("now()")
+    LocalDateTime changedAt;
 
     @Column(name = "comment")
     String comment;

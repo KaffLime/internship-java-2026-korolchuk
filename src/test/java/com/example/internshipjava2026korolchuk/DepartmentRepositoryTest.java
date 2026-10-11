@@ -2,64 +2,66 @@ package com.example.internshipjava2026korolchuk;
 
 import com.example.internshipjava2026korolchuk.entity.Department;
 import com.example.internshipjava2026korolchuk.repository.DepartmentRepository;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
+import org.springframework.boot.jdbc.test.autoconfigure.AutoConfigureTestDatabase;
+import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.springframework.test.context.ActiveProfiles;
+import org.testcontainers.containers.PostgreSQLContainer;
+import org.testcontainers.junit.jupiter.Container;
+import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @DataJpaTest
+@Testcontainers
+@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @ActiveProfiles("test")
 public class DepartmentRepositoryTest {
+    @Container
+    @ServiceConnection
+    static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:15");
+
     @Autowired
     private DepartmentRepository departmentRepository;
 
-    private Department dbDep;
-
-    @BeforeEach
-    void init() {
-        departmentRepository.deleteAll();
-
-        Department dep = new Department(null, "OGT", "5125");
-        dbDep = departmentRepository.save(dep);
-    }
-
     @Test
-    void shouldSaveEmployee() {
-        Department newDep = new Department(null, "BUH", "3333");
+    void shouldUpdateDepartment() {
+        Department newDep = new Department(-1L, "TEST", "00000");
         Department savedDep = departmentRepository.save(newDep);
 
         assertEquals(newDep.getName(), savedDep.getName());
-        assertNotNull(savedDep.getId());
-        assertEquals(2, departmentRepository.count());
+        assertNotEquals("OGT", savedDep.getName());
+        assertEquals("00000", savedDep.getCode());
     }
 
     @Test
-    void shouldFindAllEmployees() {
+    void shouldFindAllDepartments() {
         List<Department> depList = departmentRepository.findAll();
 
-        assertEquals(1, depList.size());
+        assertEquals(2, depList.size());
         assertNotNull(depList.get(0));
+        assertTrue(depList.stream().anyMatch(x -> x.getName().equals("OGT")));
     }
 
     @Test
-    void shouldDeleteEmployee() {
-        departmentRepository.delete(dbDep);
+    void shouldDeleteDepartment() {
+        departmentRepository.deleteById(-1L);
 
-        assertEquals(0, departmentRepository.count());
+        assertEquals(1, departmentRepository.count());
+        assertTrue(departmentRepository.findById(-1L).isEmpty());
     }
 
     @Test
-    void shouldNotFindEmployee() {
-        Department savedDep = departmentRepository.findAll().get(0);
-        Optional<Department> dep = departmentRepository.findById(savedDep.getId() + 1);
+    void shouldNotFindDepartment() {
+        Optional<Department> dep = departmentRepository.findById(-50L);
 
         assertTrue(dep.isEmpty());
     }

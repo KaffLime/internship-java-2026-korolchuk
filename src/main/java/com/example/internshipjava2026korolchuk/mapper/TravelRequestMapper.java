@@ -1,4 +1,4 @@
-package com.example.internshipjava2026korolchuk.service;
+package com.example.internshipjava2026korolchuk.mapper;
 
 import com.example.internshipjava2026korolchuk.dto.TravelRequestDto;
 import com.example.internshipjava2026korolchuk.entity.TravelRequest;

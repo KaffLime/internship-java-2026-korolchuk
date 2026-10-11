@@ -1,6 +1,7 @@
 package com.example.internshipjava2026korolchuk.controller;
 
 import com.example.internshipjava2026korolchuk.dto.TravelRequestDto;
+import com.example.internshipjava2026korolchuk.service.RequestHistoryService;
 import com.example.internshipjava2026korolchuk.service.TravelRequestService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -19,6 +20,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class TravelRequestController {
     private final TravelRequestService travelRequestService;
+    private final RequestHistoryService requestHistoryService;
 
     @GetMapping
     public List<TravelRequestDto> getAllTravelRequests() {
@@ -37,7 +39,9 @@ public class TravelRequestController {
 
     @PatchMapping("/{id}")
     public TravelRequestDto updateTravelRequest(@PathVariable Long id, @RequestBody TravelRequestDto travelRequestDTO) {
-        return travelRequestService.updateTravelRequest(id, travelRequestDTO);
+        TravelRequestDto updatedTravelRequestDTO = travelRequestService.updateTravelRequest(id, travelRequestDTO);
+        requestHistoryService.createHistoryRecord(id, travelRequestDTO, updatedTravelRequestDTO);
+        return updatedTravelRequestDTO;
     }
 
     @DeleteMapping("/{id}")
