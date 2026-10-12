@@ -1,0 +1,225 @@
+databaseChangeLog:
+  - changeSet:
+      id: create-departments-table
+      author: artem
+      changes:
+        - createTable:
+            tableName: departments
+            remarks: отделы
+            columns:
+              - column:
+                  name: id
+                  type: bigint
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    primaryKeyName: pk_departments
+                    nullable: false
+              - column:
+                  name: name
+                  type: text
+                  constraints:
+                    nullable: false
+              - column:
+                  name: code
+                  type: varchar(10)
+                  constraints:
+                    unique: true
+        - sql:
+            sql: |
+              ALTER TABLE departments ADD CONSTRAINT check_departments_code
+              CHECK (char_length(code) >= 3)
+  - changeSet:
+      id: create-employees-table
+      author: artem
+      changes:
+        - createTable:
+            tableName: employees
+            remarks: сотрудники
+            columns:
+              - column:
+                  name: id
+                  type: bigint
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    primaryKeyName: pk_employees
+                    nullable: false
+              - column:
+                  name: full_name
+                  type: text
+                  constraints:
+                    nullable: false
+              - column:
+                  name: email
+                  type: text
+                  constraints:
+                    unique: true
+              - column:
+                  name: position
+                  type: text
+              - column:
+                  name: department_id
+                  type: bigint
+                  constraints:
+                    nullable: false
+              - column:
+                  name: hire_date
+                  type: date
+        - addForeignKeyConstraint:
+            baseTableName: employees
+            baseColumnNames: department_id
+            referencedTableName: departments
+            referencedColumnNames: id
+            constraintName: fk_employees_department_id_departments
+            onDelete: CASCADE
+            onUpdate: RESTRICT
+        - sql:
+            sql: |
+              ALTER TABLE employees ADD CONSTRAINT check_employees_email
+              CHECK (email ~ '^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$')
+  - changeSet:
+      id: create-travel-requests-table
+      author: artem
+      changes:
+        - sql:
+            splitStatements: false
+            sql: |
+              CREATE OR REPLACE FUNCTION get_current_timestamp_for_updated_at()
+              RETURNS TRIGGER AS $$
+              BEGIN
+                NEW.updated_at = NOW();
+                RETURN NEW;
+              END;
+              $$ language plpgsql;
+        - createTable:
+            tableName: travel_requests
+            remarks: заявки на командировку
+            columns:
+              - column:
+                  name: id
+                  type: bigint
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    primaryKeyName: pk_travel_requests
+                    nullable: false
+              - column:
+                  name: employee_id
+                  type: bigint
+                  constraints:
+                    nullable: false
+              - column:
+                  name: department_id
+                  type: bigint
+                  constraints:
+                    nullable: false
+              - column:
+                  name: destination
+                  type: text
+              - column:
+                  name: start_date
+                  type: date
+              - column:
+                  name: end_date
+                  type: date
+              - column:
+                  name: purpose
+                  type: varchar(500)
+              - column:
+                  name: status
+                  type: varchar(32)
+                  defaultValue: 'DRAFT'
+                  constraints:
+                    nullable: false
+              - column:
+                  name: created_at
+                  type: timestamp
+                  defaultValueComputed: NOW()
+                  constraints:
+                    nullable: false
+              - column:
+                  name: updated_at
+                  type: timestamp
+                  defaultValueComputed: NOW()
+                  constraints:
+                    nullable: false
+              - column:
+                  name: estimated_cost
+                  type: numeric
+        - sql:
+            splitStatements: false
+            sql: |
+              CREATE TRIGGER update_updated_at
+              BEFORE UPDATE ON travel_requests
+              FOR EACH ROW
+              EXECUTE FUNCTION get_current_timestamp_for_updated_at();
+        - sql:
+            sql: |
+              ALTER TABLE travel_requests ADD CONSTRAINT check_travel_requests_status
+              CHECK (status IN ('DRAFT', 'SUBMITTED', 'APPROVED', 'REJECTED', 'CANCELLED'))
+        - sql:
+            sql: |
+              ALTER TABLE travel_requests ADD CONSTRAINT check_travel_requests_start_date_end_date
+              CHECK (end_date >= start_date)
+        - sql:
+            sql: |
+              ALTER TABLE travel_requests ADD CONSTRAINT check_travel_requests_purpose
+              CHECK (char_length(purpose) >= 10)
+        - sql:
+            sql: |
+              ALTER TABLE travel_requests ADD CONSTRAINT check_travel_requests_estimated_cost
+              CHECK (estimated_cost >= 0.0)
+  - changeSet:
+      id: create-requests-history-table
+      author: artem
+      changes:
+        - createTable:
+            tableName: requests_history
+            remarks: история заявок
+            columns:
+              - column:
+                  name: id
+                  type: bigint
+                  autoIncrement: true
+                  constraints:
+                    nullable: false
+              - column:
+                  name: travel_request_id
+                  type: bigint
+                  constraints:
+                    nullable: false
+              - column:
+                  name: old_status
+                  type: varchar(32)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: new_status
+                  type: varchar(32)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: changed_at
+                  type: timestamp
+                  defaultValueComputed: NOW()
+                  constraints:
+                    nullable: false
+              - column:
+                  name: comment
+                  type: text
+        - addForeignKeyConstraint:
+            baseTableName: requests_history
+            baseColumnNames: travel_request_id
+            referencedTableName: travel_requests
+            referencedColumnNames: id
+            constraintName: fk_requests_history_travel_request_id_travel_requests
+            onDelete: CASCADE
+            onUpdate: RESTRICT
+        - sql:
+            sql: |
+              ALTER TABLE requests_history ADD CONSTRAINT check_requests_history_oldStatus_newStatus
+              CHECK (
+                old_status IN ('DRAFT', 'SUBMITTED', 'APPROVED', 'REJECTED', 'CANCELLED') AND
+                new_status IN ('DRAFT', 'SUBMITTED', 'APPROVED', 'REJECTED', 'CANCELLED')
+              )

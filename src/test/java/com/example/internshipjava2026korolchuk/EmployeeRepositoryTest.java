@@ -1,5 +1,8 @@
 package com.example.internshipjava2026korolchuk;
 
+import com.example.internshipjava2026korolchuk.dao.qbe.EmployeeSearchQbeDao;
+import com.example.internshipjava2026korolchuk.dao.specifications.EmployeeFilterSpecificationsDao;
+import com.example.internshipjava2026korolchuk.dao.specifications.EmployeeSpecs;
 import com.example.internshipjava2026korolchuk.entity.Department;
 import com.example.internshipjava2026korolchuk.entity.Employee;
 import com.example.internshipjava2026korolchuk.repository.DepartmentRepository;
@@ -9,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
 import org.springframework.boot.jdbc.test.autoconfigure.AutoConfigureTestDatabase;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
+import org.springframework.data.domain.Example;
 import org.springframework.test.context.ActiveProfiles;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
@@ -37,6 +41,12 @@ public class EmployeeRepositoryTest {
 
     @Autowired
     private DepartmentRepository departmentRepository;
+
+    @Autowired
+    private EmployeeSearchQbeDao employeeSearchQbeDao;
+
+    @Autowired
+    private EmployeeFilterSpecificationsDao employeeFilterSpecificationsDao;
 
     @Test
     void shouldUpdateEmployee() {
@@ -73,5 +83,25 @@ public class EmployeeRepositoryTest {
         Optional<Employee> emp = employeeRepository.findById(-50L);
 
         assertTrue(emp.isEmpty());
+    }
+
+    @Test
+    void shouldFindEmployeeByExample() {
+        Employee emp = new Employee();
+        emp.setFullName("Иванов Иван Иванович");
+        emp.setPosition("Бухгалтер");
+
+        Employee foundEmp = employeeSearchQbeDao.findOne(Example.of(emp)).get();
+
+        assertNotNull(foundEmp);
+    }
+
+    @Test
+    void shouldFilterEmployees() {
+        List<Employee> empList = employeeFilterSpecificationsDao.findAll(EmployeeSpecs.hasWorkedForYear()
+                .and(EmployeeSpecs.emailLike("%gmail.com")));
+
+        assertEquals(1, empList.size());
+        assertEquals("Васнецова Светлана Викторовна", empList.stream().findFirst().get().getFullName());
     }
 }

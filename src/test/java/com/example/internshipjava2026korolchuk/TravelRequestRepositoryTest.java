@@ -1,5 +1,7 @@
 package com.example.internshipjava2026korolchuk;
 
+import com.example.internshipjava2026korolchuk.dao.criteria.TravelRequestCriteriaDao;
+import com.example.internshipjava2026korolchuk.dao.jpql.TravelRequestSearchJpqlDao;
 import com.example.internshipjava2026korolchuk.entity.Department;
 import com.example.internshipjava2026korolchuk.entity.Employee;
 import com.example.internshipjava2026korolchuk.entity.TravelRequest;
@@ -13,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
 import org.springframework.boot.jdbc.test.autoconfigure.AutoConfigureTestDatabase;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
+import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
@@ -29,6 +32,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @DataJpaTest
+@Import(TravelRequestCriteriaDao.class)
 @Testcontainers
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @ActiveProfiles("test")
@@ -48,6 +52,12 @@ public class TravelRequestRepositoryTest {
 
     @Autowired
     private EntityManager entityManager;
+
+    @Autowired
+    private TravelRequestSearchJpqlDao travelRequestSearchJpqlDao;
+
+    @Autowired
+    private TravelRequestCriteriaDao travelRequestCriteriaDao;
 
     @Test
     void shouldUpdateTravelRequest() {
@@ -87,5 +97,20 @@ public class TravelRequestRepositoryTest {
         Optional<TravelRequest> tr = travelRequestRepository.findById(-20L);
 
         assertTrue(tr.isEmpty());
+    }
+
+    @Test
+    void shouldFindAllTravelRequestsByDepartmentId() {
+        List<TravelRequest> trList = travelRequestSearchJpqlDao.findByDepartmentId(-1L);
+
+        assertEquals(1, trList.size());
+        assertTrue(trList.stream().anyMatch(x -> x.getId().equals(-1L)));
+    }
+
+    @Test
+    void shouldCountActiveTravelRequests() {
+        long count = travelRequestCriteriaDao.countActiveTravelRequests();
+
+        assertEquals(0, count);
     }
 }
