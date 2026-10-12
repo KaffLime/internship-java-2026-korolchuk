@@ -1,0 +1,201 @@
+databaseChangeLog:
+  - changeSet:
+      id: insert-departments
+      author: artem
+      context: test
+      changes:
+        - insert:
+            tableName: departments
+            columns:
+              - column:
+                  name: id
+                  valueNumeric: -1
+              - column:
+                  name: name
+                  value: 'OGT'
+              - column:
+                  name: code
+                  value: '5555'
+        - insert:
+            tableName: departments
+            columns:
+              - column:
+                  name: id
+                  valueNumeric: -2
+              - column:
+                  name: name
+                  value: 'BUH'
+              - column:
+                  name: code
+                  value: '1234'
+  - changeSet:
+      id: insert-employees
+      author: artem
+      context: test
+      changes:
+        - insert:
+            tableName: employees
+            columns:
+              - column:
+                  name: id
+                  valueNumeric: -1
+              - column:
+                  name: full_name
+                  value: 'Корольчук Артем Сергеевич'
+              - column:
+                  name: email
+                  value: 'artem@mail.ru'
+              - column:
+                  name: position
+                  value: 'Инженер'
+              - column:
+                  name: department_id
+                  valueNumeric: -1
+              - column:
+                  name: hire_date
+                  valueDate: '2026-01-05'
+        - insert:
+            tableName: employees
+            columns:
+              - column:
+                  name: id
+                  valueNumeric: -2
+              - column:
+                  name: full_name
+                  value: 'Иванов Иван Иванович'
+              - column:
+                  name: email
+                  value: 'ivan34@mail.ru'
+              - column:
+                  name: position
+                  value: 'Бухгалтер'
+              - column:
+                  name: department_id
+                  valueNumeric: -2
+              - column:
+                  name: hire_date
+                  valueDate: '2026-02-07'
+        - insert:
+            tableName: employees
+            columns:
+              - column:
+                  name: id
+                  valueNumeric: -3
+              - column:
+                  name: full_name
+                  value: 'Васнецова Светлана Викторовна'
+              - column:
+                  name: email
+                  value: 'svetik@gmail.com'
+              - column:
+                  name: position
+                  value: 'Главный бухгалтер'
+              - column:
+                  name: department_id
+                  valueNumeric: -2
+              - column:
+                  name: hire_date
+                  valueDate: '2025-08-21'
+  - changeSet:
+      id: insert-travel-requests
+      author: artem
+      context: test
+      changes:
+        - insert:
+            tableName: travel_requests
+            columns:
+              - column:
+                  name: id
+                  valueNumeric: -1
+              - column:
+                  name: employee_id
+                  valueNumeric: -1
+              - column:
+                  name: department_id
+                  valueNumeric: -1
+              - column:
+                  name: destination
+                  value: 'Москва'
+              - column:
+                  name: start_date
+                  valueDate: '2026-05-20'
+              - column:
+                  name: end_date
+                  valueDate: '2026-05-25'
+              - column:
+                  name: purpose
+                  value: 'Посмотреть на работу конкурентов'
+              - column:
+                  name: status
+                  value: 'SUBMITTED'
+              - column:
+                  name: created_at
+                  valueDate: '2026-05-20T15:00:00'
+              - column:
+                  name: updated_at
+                  valueDate: '2026-05-20T15:00:00'
+              - column:
+                  name: estimated_cost
+                  valueNumeric: 400.00
+        - insert:
+            tableName: travel_requests
+            columns:
+              - column:
+                  name: id
+                  valueNumeric: -2
+              - column:
+                  name: employee_id
+                  valueNumeric: -3
+              - column:
+                  name: department_id
+                  valueNumeric: -2
+              - column:
+                  name: destination
+                  value: 'Брест'
+              - column:
+                  name: start_date
+                  valueDate: '2026-06-02'
+              - column:
+                  name: end_date
+                  valueDate: '2026-06-02'
+              - column:
+                  name: purpose
+                  value: 'Подписать договор'
+              - column:
+                  name: status
+                  value: 'DRAFT'
+              - column:
+                  name: created_at
+                  valueDate: '2026-06-02T10:00:00'
+              - column:
+                  name: updated_at
+                  valueDate: '2026-06-02T10:00:00'
+              - column:
+                  name: estimated_cost
+                  valueNumeric: 50.00
+  - changeSet:
+      id: insert-requests-history
+      author: artem
+      context: test
+      changes:
+        - insert:
+            tableName: requests_history
+            columns:
+              - column:
+                  name: id
+                  valueNumeric: -1
+              - column:
+                  name: travel_request_id
+                  valueNumeric: -1
+              - column:
+                  name: old_status
+                  value: 'DRAFT'
+              - column:
+                  name: new_status
+                  value: 'SUBMITTED'
+              - column:
+                  name: changed_at
+                  valueDate: '2026-05-21T10:25:00'
+              - column:
+                  name: comment
+                  value: 'Заявка подана'
