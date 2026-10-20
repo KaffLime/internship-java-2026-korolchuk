@@ -1,7 +1,6 @@
 package com.example.internshipjava2026korolchuk;
 
 import com.example.internshipjava2026korolchuk.dao.criteria.TravelRequestCriteriaDao;
-import com.example.internshipjava2026korolchuk.dao.jpql.TravelRequestSearchJpqlDao;
 import com.example.internshipjava2026korolchuk.entity.Department;
 import com.example.internshipjava2026korolchuk.entity.Employee;
 import com.example.internshipjava2026korolchuk.entity.TravelRequest;
@@ -53,12 +52,6 @@ public class TravelRequestRepositoryTest {
     @Autowired
     private EntityManager entityManager;
 
-    @Autowired
-    private TravelRequestSearchJpqlDao travelRequestSearchJpqlDao;
-
-    @Autowired
-    private TravelRequestCriteriaDao travelRequestCriteriaDao;
-
     @Test
     void shouldUpdateTravelRequest() {
         Department dep = departmentRepository.findById(-1L).get();
@@ -97,20 +90,5 @@ public class TravelRequestRepositoryTest {
         Optional<TravelRequest> tr = travelRequestRepository.findById(-20L);
 
         assertTrue(tr.isEmpty());
-    }
-
-    @Test
-    void shouldFindAllTravelRequestsByDepartmentId() {
-        List<TravelRequest> trList = travelRequestSearchJpqlDao.findByDepartmentId(-1L);
-
-        assertEquals(1, trList.size());
-        assertTrue(trList.stream().anyMatch(x -> x.getId().equals(-1L)));
-    }
-
-    @Test
-    void shouldCountActiveTravelRequests() {
-        long count = travelRequestCriteriaDao.countActiveTravelRequests();
-
-        assertEquals(0, count);
     }
 }

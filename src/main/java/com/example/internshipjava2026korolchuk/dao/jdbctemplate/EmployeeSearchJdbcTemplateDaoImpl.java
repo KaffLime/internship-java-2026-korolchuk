@@ -2,21 +2,21 @@ package com.example.internshipjava2026korolchuk.dao.jdbctemplate;
 
 import com.example.internshipjava2026korolchuk.entity.Department;
 import com.example.internshipjava2026korolchuk.entity.Employee;
+import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
 
 @Repository
+@RequiredArgsConstructor
 public class EmployeeSearchJdbcTemplateDaoImpl implements EmployeeSearchJdbcTemplateDao {
     private final JdbcTemplate jdbc;
 
-    public EmployeeSearchJdbcTemplateDaoImpl(JdbcTemplate jdbc) {
-        this.jdbc = jdbc;
-    }
-
+    @Transactional(readOnly = true)
     public List<Employee> findByDepartmentId(Long id) {
         String sql = """
                 SELECT e.id, e.full_name, e.email, e.position, e.hire_date, d.id AS dep_id, d.name, d.code
