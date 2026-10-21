@@ -17,12 +17,15 @@ public class EmployeeSearchQbeDao {
     private final EmployeeRepository employeeRepository;
 
     @Transactional(readOnly = true)
-    public Page<Employee> findByExample(Employee emp, Pageable pageable) {
+    public Page<Employee> findByExample(String fullName, String email, Pageable pageable) {
         ExampleMatcher matcher = ExampleMatcher.matching()
                 .withIgnorePaths(Employee_.ID)
                 .withMatcher(Employee_.EMAIL, match -> match.ignoreCase())
-                .withMatcher(Employee_.FULL_NAME, match -> match.ignoreCase().contains())
-                .withMatcher(Employee_.POSITION, match -> match.ignoreCase().contains());
+                .withMatcher(Employee_.FULL_NAME, match -> match.ignoreCase().contains());
+
+        Employee emp = new Employee();
+        emp.setFullName(fullName);
+        emp.setEmail(email);
 
         return employeeRepository.findAll(Example.of(emp, matcher), pageable);
     }

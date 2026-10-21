@@ -10,14 +10,7 @@ import org.hibernate.SessionFactory;
 import org.hibernate.stat.Statistics;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
-import org.springframework.boot.jdbc.test.autoconfigure.AutoConfigureTestDatabase;
-import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
-import org.testcontainers.containers.PostgreSQLContainer;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -26,17 +19,10 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-@DataJpaTest
-@Testcontainers
-@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-@ActiveProfiles("test")
-public class EmployeeRepositoryTest {
-    @Container
-    @ServiceConnection
-    static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:15");
-
+public class EmployeeRepositoryTest extends BaseIntegrationTest {
     @Autowired
     private EmployeeRepository employeeRepository;
 
@@ -69,11 +55,8 @@ public class EmployeeRepositoryTest {
     }
 
     @Test
-    void shouldDeleteEmployee() {
-        employeeRepository.deleteById(-1L);
-
-        assertEquals(2, employeeRepository.count());
-        assertTrue(employeeRepository.findById(-1L).isEmpty());
+    void shouldNotDeleteEmployee() {
+        assertThrows(Exception.class, () -> employeeRepository.deleteById(-1L));
     }
 
     @Test

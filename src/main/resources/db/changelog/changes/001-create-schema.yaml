@@ -72,7 +72,7 @@ databaseChangeLog:
             referencedTableName: departments
             referencedColumnNames: id
             constraintName: fk_employees_department_id_departments
-            onDelete: CASCADE
+            onDelete: RESTRICT
             onUpdate: RESTRICT
         - sql:
             sql: |
@@ -147,6 +147,22 @@ databaseChangeLog:
               - column:
                   name: estimated_cost
                   type: numeric
+        - addForeignKeyConstraint:
+            baseTableName: travel_requests
+            baseColumnNames: employee_id
+            referencedTableName: employees
+            referencedColumnNames: id
+            constraintName: fk_travel_requests_employee_id_employees
+            onDelete: RESTRICT
+            onUpdate: RESTRICT
+        - addForeignKeyConstraint:
+            baseTableName: travel_requests
+            baseColumnNames: department_id
+            referencedTableName: departments
+            referencedColumnNames: id
+            constraintName: fk_travel_requests_department_id_departments
+            onDelete: RESTRICT
+            onUpdate: RESTRICT
         - sql:
             splitStatements: false
             sql: |

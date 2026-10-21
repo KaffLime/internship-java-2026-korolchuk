@@ -10,16 +10,20 @@ import java.time.LocalDate;
 public class EmployeeSpecs {
     public static Specification<Employee> hiredBeforeDate(LocalDate date) {
         return ((root, query, cb) -> {
-            if (date == null)
+            if (date == null) {
                 return null;
+            }
+
             return cb.lessThan(root.get(Employee_.HIRE_DATE), date);
         });
     }
 
     public static Specification<Employee> hiredAfterDate(LocalDate date) {
         return ((root, query, cb) -> {
-            if (date == null)
+            if (date == null) {
                 return null;
+            }
+
             return cb.greaterThan(root.get(Employee_.HIRE_DATE), date);
         });
     }
@@ -29,6 +33,7 @@ public class EmployeeSpecs {
             if (id == null) {
                 return null;
             }
+
             return cb.equal(root.get(Employee_.DEPARTMENT).get(Department_.ID), id);
         });
     }
@@ -38,7 +43,9 @@ public class EmployeeSpecs {
             if (position == null) {
                 return null;
             }
-            return cb.equal(root.get(Employee_.POSITION), position);
+
+            String pattern = "%" + position + "%";
+            return cb.like(root.get(Employee_.POSITION), pattern);
         });
     }
 }

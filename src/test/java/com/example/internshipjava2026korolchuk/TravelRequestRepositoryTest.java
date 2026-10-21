@@ -11,14 +11,8 @@ import com.example.internshipjava2026korolchuk.repository.TravelRequestRepositor
 import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
-import org.springframework.boot.jdbc.test.autoconfigure.AutoConfigureTestDatabase;
-import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.springframework.context.annotation.Import;
-import org.springframework.test.context.ActiveProfiles;
-import org.testcontainers.containers.PostgreSQLContainer;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -30,16 +24,8 @@ import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-@DataJpaTest
 @Import(TravelRequestCriteriaDao.class)
-@Testcontainers
-@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-@ActiveProfiles("test")
-public class TravelRequestRepositoryTest {
-    @Container
-    @ServiceConnection
-    static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:15");
-
+public class TravelRequestRepositoryTest extends BaseIntegrationTest {
     @Autowired
     private TravelRequestRepository travelRequestRepository;
 
@@ -53,6 +39,7 @@ public class TravelRequestRepositoryTest {
     private EntityManager entityManager;
 
     @Test
+    @Transactional
     void shouldUpdateTravelRequest() {
         Department dep = departmentRepository.findById(-1L).get();
         Employee emp = employeeRepository.findById(-1L).get();

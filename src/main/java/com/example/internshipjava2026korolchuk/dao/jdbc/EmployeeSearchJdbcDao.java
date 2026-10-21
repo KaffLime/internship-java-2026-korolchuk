@@ -63,57 +63,85 @@ public class EmployeeSearchJdbcDao {
         return Optional.ofNullable(emp);
     }
 
-    @Transactional
     public boolean moveToDepartment(Long empId, Long newDepId) {
-        String getEmpQuery = "SELECT * FROM employees WHERE id = ?";
-        String updateEmpQuery = "UPDATE employees SET department_id = ? WHERE id = ?";
-        String updateTravelReqsQuery = """
-                UPDATE travel_requests SET department_id = ?
-                WHERE employee_id = ? AND status = 'DRAFT'""";
+        Connection connection = null;
 
-        Employee emp = new Employee();
-        long curDepId;
+        try {
+            connection = dataSource.getConnection();
+            connection.setAutoCommit(false);
 
-        try (Connection connection = dataSource.getConnection();
-             PreparedStatement getEmpPs = connection.prepareStatement(getEmpQuery);
-             PreparedStatement updateEmpPs = connection.prepareStatement(updateEmpQuery);
-             PreparedStatement updateTravelReqsPs = connection.prepareStatement(updateTravelReqsQuery)) {
+            String getEmpQuery = "SELECT * FROM employees WHERE id = ?";
+            String updateEmpQuery = "UPDATE employees SET department_id = ? WHERE id = ?";
+            String updateTravelReqsQuery = """
+                    UPDATE travel_requests SET department_id = ?
+                    WHERE employee_id = ? AND status = 'DRAFT'""";
 
-            getEmpPs.setLong(1, empId);
+            Employee emp = new Employee();
+            long curDepId;
 
-            try (ResultSet rsEmp = getEmpPs.executeQuery()) {
-                if (!rsEmp.next())
-                    return false;
+            try (PreparedStatement getEmpPs = connection.prepareStatement(getEmpQuery);
+                 PreparedStatement updateEmpPs = connection.prepareStatement(updateEmpQuery);
+                 PreparedStatement updateTravelReqsPs = connection.prepareStatement(updateTravelReqsQuery)) {
 
-                curDepId = rsEmp.getLong("department_id");
+                getEmpPs.setLong(1, empId);
 
-                if (curDepId == newDepId) {
-                    return false;
+                try (ResultSet rsEmp = getEmpPs.executeQuery()) {
+                    if (!rsEmp.next())
+                        return false;
+
+                    curDepId = rsEmp.getLong("department_id");
+
+                    if (curDepId == newDepId) {
+                        return false;
+                    }
+
+                    emp.setId(empId);
+                    emp.setFullName(rsEmp.getString("full_name"));
+                    emp.setEmail(rsEmp.getString("email"));
+                    emp.setPosition(rsEmp.getString("position"));
+                    emp.setHireDate(rsEmp.getDate("hire_date").toLocalDate());
                 }
 
-                emp.setId(empId);
-                emp.setFullName(rsEmp.getString("full_name"));
-                emp.setEmail(rsEmp.getString("email"));
-                emp.setPosition(rsEmp.getString("position"));
-                emp.setHireDate(rsEmp.getDate("hire_date").toLocalDate());
+                updateEmpPs.setLong(1, newDepId);
+                updateEmpPs.setLong(2, empId);
+
+                long movedEmpsCount = updateEmpPs.executeUpdate();
+
+                if (movedEmpsCount == 0)
+                    return false;
+
+                updateTravelReqsPs.setLong(1, newDepId);
+                updateTravelReqsPs.setLong(2, empId);
+
+                updateTravelReqsPs.executeUpdate();
+
+                connection.commit();
+            } catch (SQLException ex) {
+                ex.printStackTrace();
             }
 
-            updateEmpPs.setLong(1, newDepId);
-            updateEmpPs.setLong(2, empId);
+            return true;
+        } catch (SQLException e) {
+            try {
+                if (connection != null) {
+                    connection.rollback();
+                }
+            } catch (SQLException ex) {
+                ex.printStackTrace();
+            }
 
-            long movedEmpsCount = updateEmpPs.executeUpdate();
+            e.printStackTrace();
 
-            if (movedEmpsCount == 0)
-                return false;
-
-            updateTravelReqsPs.setLong(1, newDepId);
-            updateTravelReqsPs.setLong(2, empId);
-
-            updateTravelReqsPs.executeUpdate();
-        } catch (SQLException ex) {
-            ex.printStackTrace();
+            return false;
+        } finally {
+            try {
+                if (connection != null) {
+                    connection.setAutoCommit(true);
+                    connection.close();
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
         }
-
-        return true;
     }
 }
