@@ -2,6 +2,7 @@ package com.example.internshipjava2026korolchuk.service;
 
 import com.example.internshipjava2026korolchuk.dto.TravelRequestDto;
 import com.example.internshipjava2026korolchuk.entity.TravelRequest;
+import com.example.internshipjava2026korolchuk.mapper.TravelRequestMapper;
 import com.example.internshipjava2026korolchuk.repository.TravelRequestRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

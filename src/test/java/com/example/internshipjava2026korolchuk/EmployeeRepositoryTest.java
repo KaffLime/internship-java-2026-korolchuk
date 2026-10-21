@@ -1,0 +1,87 @@
+package com.example.internshipjava2026korolchuk;
+
+import com.example.internshipjava2026korolchuk.entity.Department;
+import com.example.internshipjava2026korolchuk.entity.Employee;
+import com.example.internshipjava2026korolchuk.repository.DepartmentRepository;
+import com.example.internshipjava2026korolchuk.repository.EmployeeRepository;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import org.hibernate.SessionFactory;
+import org.hibernate.stat.Statistics;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDate;
+import java.util.List;
+import java.util.Optional;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+public class EmployeeRepositoryTest extends BaseIntegrationTest {
+    @Autowired
+    private EmployeeRepository employeeRepository;
+
+    @Autowired
+    private DepartmentRepository departmentRepository;
+
+    @PersistenceContext
+    EntityManager entityManager;
+
+    @Test
+    void shouldUpdateEmployee() {
+        Department dep = departmentRepository.findById(-2L).get();
+
+        Employee newEmp = new Employee(-1L, "Карташов Егор Акакьевич",
+                "kart@mail.ru", "Бухгалтер", dep, LocalDate.now());
+        Employee savedEmp = employeeRepository.save(newEmp);
+
+        assertEquals(newEmp.getFullName(), savedEmp.getFullName());
+        assertNotEquals("artem@mail.ru", savedEmp.getEmail());
+        assertEquals("Бухгалтер", savedEmp.getPosition());
+    }
+
+    @Test
+    void shouldFindAllEmployees() {
+        List<Employee> empList = employeeRepository.findAll();
+
+        assertEquals(3, empList.size());
+        assertNotNull(empList.get(0));
+        assertTrue(empList.stream().anyMatch(x -> x.getEmail().equals("artem@mail.ru")));
+    }
+
+    @Test
+    void shouldNotDeleteEmployee() {
+        assertThrows(Exception.class, () -> employeeRepository.deleteById(-1L));
+    }
+
+    @Test
+    void shouldNotFindEmployee() {
+        Optional<Employee> emp = employeeRepository.findById(-50L);
+
+        assertTrue(emp.isEmpty());
+    }
+
+    @Test
+    @Transactional
+    void shouldShowThatEntityGraphWorks() {
+        Statistics stats = entityManager.getEntityManagerFactory().unwrap(SessionFactory.class).getStatistics();
+
+        stats.clear();
+        employeeRepository.findAll().forEach(x -> x.getDepartment().getName());
+        long withoutNPlusOne = stats.getPrepareStatementCount();
+
+        entityManager.clear();
+        stats.clear();
+
+        employeeRepository.findAllWithDepartment().forEach(x -> x.getDepartment().getName());
+        long withNPlusOne = stats.getPrepareStatementCount();
+
+        assertEquals(1, withoutNPlusOne);
+        assertTrue(withNPlusOne > 1);
+    }
+}

@@ -2,6 +2,7 @@ package com.example.internshipjava2026korolchuk.service;
 
 import com.example.internshipjava2026korolchuk.dto.DepartmentDto;
 import com.example.internshipjava2026korolchuk.entity.Department;
+import com.example.internshipjava2026korolchuk.mapper.DepartmentMapper;
 import com.example.internshipjava2026korolchuk.repository.DepartmentRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

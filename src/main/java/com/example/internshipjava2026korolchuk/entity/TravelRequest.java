@@ -18,6 +18,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
+import org.hibernate.annotations.ColumnDefault;
+import org.hibernate.annotations.Generated;
+import org.hibernate.generator.EventType;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -62,10 +65,14 @@ public class TravelRequest {
     @Enumerated(EnumType.STRING)
     TravelRequestStatus status;
 
-    @Column(name = "created_at")
+    @Column(name = "created_at", insertable = false, updatable = false)
+    @Generated(event = EventType.INSERT)
+    @ColumnDefault("now()")
     LocalDateTime createdAt;
 
-    @Column(name = "updated_at")
+    @Column(name = "updated_at", insertable = false)
+    @Generated(event = {EventType.INSERT, EventType.UPDATE})
+    @ColumnDefault("now()")
     LocalDateTime updatedAt;
 
     @Column(name = "estimated_cost")
