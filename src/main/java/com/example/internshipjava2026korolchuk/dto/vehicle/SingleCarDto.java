@@ -1,7 +1,5 @@
 package com.example.internshipjava2026korolchuk.dto.vehicle;
 
-import jakarta.validation.constraints.NotNull;
-
 public record SingleCarDto(
         Long id,
         String model,

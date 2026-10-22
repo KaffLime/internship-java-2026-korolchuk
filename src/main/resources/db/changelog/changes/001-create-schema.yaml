@@ -25,10 +25,6 @@ databaseChangeLog:
                   type: varchar(10)
                   constraints:
                     unique: true
-        - sql:
-            sql: |
-              ALTER TABLE departments ADD CONSTRAINT check_departments_code
-              CHECK (char_length(code) >= 3)
   - changeSet:
       id: create-employees-table
       author: artem
@@ -74,24 +70,10 @@ databaseChangeLog:
             constraintName: fk_employees_department_id_departments
             onDelete: RESTRICT
             onUpdate: RESTRICT
-        - sql:
-            sql: |
-              ALTER TABLE employees ADD CONSTRAINT check_employees_email
-              CHECK (email ~ '^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$')
   - changeSet:
       id: create-travel-requests-table
       author: artem
       changes:
-        - sql:
-            splitStatements: false
-            sql: |
-              CREATE OR REPLACE FUNCTION get_current_timestamp_for_updated_at()
-              RETURNS TRIGGER AS $$
-              BEGIN
-                NEW.updated_at = NOW();
-                RETURN NEW;
-              END;
-              $$ language plpgsql;
         - createTable:
             tableName: travel_requests
             remarks: заявки на командировку
@@ -163,29 +145,6 @@ databaseChangeLog:
             constraintName: fk_travel_requests_department_id_departments
             onDelete: RESTRICT
             onUpdate: RESTRICT
-        - sql:
-            splitStatements: false
-            sql: |
-              CREATE TRIGGER update_updated_at
-              BEFORE UPDATE ON travel_requests
-              FOR EACH ROW
-              EXECUTE FUNCTION get_current_timestamp_for_updated_at();
-        - sql:
-            sql: |
-              ALTER TABLE travel_requests ADD CONSTRAINT check_travel_requests_status
-              CHECK (status IN ('DRAFT', 'SUBMITTED', 'APPROVED', 'REJECTED', 'CANCELLED'))
-        - sql:
-            sql: |
-              ALTER TABLE travel_requests ADD CONSTRAINT check_travel_requests_start_date_end_date
-              CHECK (end_date >= start_date)
-        - sql:
-            sql: |
-              ALTER TABLE travel_requests ADD CONSTRAINT check_travel_requests_purpose
-              CHECK (char_length(purpose) >= 10)
-        - sql:
-            sql: |
-              ALTER TABLE travel_requests ADD CONSTRAINT check_travel_requests_estimated_cost
-              CHECK (estimated_cost >= 0.0)
   - changeSet:
       id: create-requests-history-table
       author: artem
@@ -232,10 +191,3 @@ databaseChangeLog:
             constraintName: fk_requests_history_travel_request_id_travel_requests
             onDelete: CASCADE
             onUpdate: RESTRICT
-        - sql:
-            sql: |
-              ALTER TABLE requests_history ADD CONSTRAINT check_requests_history_oldStatus_newStatus
-              CHECK (
-                old_status IN ('DRAFT', 'SUBMITTED', 'APPROVED', 'REJECTED', 'CANCELLED') AND
-                new_status IN ('DRAFT', 'SUBMITTED', 'APPROVED', 'REJECTED', 'CANCELLED')
-              )

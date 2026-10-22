@@ -1,5 +1,6 @@
 package com.example.internshipjava2026korolchuk.entity;
 
+import com.example.internshipjava2026korolchuk.validator.DateRange;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -32,6 +33,7 @@ import java.time.LocalDateTime;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@DateRange
 public class TravelRequest {
     @Column(name = "id")
     @Id

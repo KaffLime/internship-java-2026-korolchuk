@@ -11,6 +11,7 @@ import org.mapstruct.NullValuePropertyMappingStrategy;
 public interface DepartmentMapper {
     DepartmentDto toDto(Department department);
 
+    @Mapping(target = "id", ignore = true)
     Department toEntity(DepartmentDto dto);
 
     @Mapping(target = "id", ignore = true)

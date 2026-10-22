@@ -4,12 +4,14 @@ import com.example.internshipjava2026korolchuk.dto.EmployeeDto;
 import com.example.internshipjava2026korolchuk.entity.Employee;
 import com.example.internshipjava2026korolchuk.mapper.EmployeeMapper;
 import com.example.internshipjava2026korolchuk.repository.EmployeeRepository;
+import com.example.internshipjava2026korolchuk.specification.EmployeeFilter;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.ArrayList;
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -18,21 +20,17 @@ public class EmployeeService {
     private final EmployeeMapper employeeMapper;
 
     @Transactional(readOnly = true)
-    public List<EmployeeDto> getAllEmployees() {
-        ArrayList<Employee> employees = (ArrayList<Employee>) employeeRepository.findAll();
-        ArrayList<EmployeeDto> employeeDtos = new ArrayList<>();
+    public Page<EmployeeDto> getAllEmployees(EmployeeFilter filter, Pageable pageable) {
+        Specification<Employee> spec = EmployeeFilter.byFilter(filter);
+        Page<Employee> page = employeeRepository.findAll(spec, pageable);
 
-        for (Employee employee : employees) {
-            employeeDtos.add(employeeMapper.toDto(employee));
-        }
-
-        return employeeDtos;
+        return page.map(employeeMapper::toDto);
     }
 
     @Transactional(readOnly = true)
     public EmployeeDto getEmployeeById(Long id) {
         return employeeMapper.toDto(employeeRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Пользователя с таким id не существует")));
+                .orElseThrow(() -> new EntityNotFoundException("Пользователь с id '" + id + "' не найден")));
     }
 
     @Transactional
@@ -43,7 +41,7 @@ public class EmployeeService {
     @Transactional
     public EmployeeDto updateEmployee(Long id, EmployeeDto employeeDto) {
         Employee employee = employeeRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Пользователя с таким id не существует"));
+                .orElseThrow(() -> new EntityNotFoundException("Пользователь с id '" + id + "' не найден"));
 
         employeeMapper.updateEmployeeFromDto(employeeDto, employee);
 

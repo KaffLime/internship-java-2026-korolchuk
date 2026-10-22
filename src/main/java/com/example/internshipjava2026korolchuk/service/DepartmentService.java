@@ -4,12 +4,14 @@ import com.example.internshipjava2026korolchuk.dto.DepartmentDto;
 import com.example.internshipjava2026korolchuk.entity.Department;
 import com.example.internshipjava2026korolchuk.mapper.DepartmentMapper;
 import com.example.internshipjava2026korolchuk.repository.DepartmentRepository;
+import com.example.internshipjava2026korolchuk.specification.DepartmentFilter;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.ArrayList;
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -18,21 +20,17 @@ public class DepartmentService {
     private final DepartmentMapper departmentMapper;
 
     @Transactional(readOnly = true)
-    public List<DepartmentDto> getAllDepartments() {
-        ArrayList<Department> departments = (ArrayList<Department>) departmentRepository.findAll();
-        ArrayList<DepartmentDto> departmentDtos = new ArrayList<>();
+    public Page<DepartmentDto> getAllDepartments(DepartmentFilter filter, Pageable pageable) {
+        Specification<Department> spec = DepartmentFilter.byFilter(filter);
+        Page<Department> page = departmentRepository.findAll(spec, pageable);
 
-        for (Department department : departments) {
-            departmentDtos.add(departmentMapper.toDto(department));
-        }
-
-        return departmentDtos;
+        return page.map(departmentMapper::toDto);
     }
 
     @Transactional(readOnly = true)
     public DepartmentDto getDepartmentById(Long id) {
         return departmentMapper.toDto(departmentRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Подразделения с таким id не существует")));
+                .orElseThrow(() -> new EntityNotFoundException("Подразделение с id '" + id + "' не найдено")));
     }
 
     @Transactional
@@ -43,7 +41,7 @@ public class DepartmentService {
     @Transactional
     public DepartmentDto updateDepartment(Long id, DepartmentDto departmentDto) {
         Department department = departmentRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Подразделения с таким id не существует"));
+                .orElseThrow(() -> new EntityNotFoundException("Подразделение с id '" + id + "' не найдено"));
 
         departmentMapper.updateDepartmentFromDto(departmentDto, department);
 

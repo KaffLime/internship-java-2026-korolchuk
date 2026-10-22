@@ -11,6 +11,7 @@ import org.mapstruct.NullValuePropertyMappingStrategy;
 public interface TravelRequestMapper {
     TravelRequestDto toDto(TravelRequest travelRequest);
 
+    @Mapping(target = "id", ignore = true)
     TravelRequest toEntity(TravelRequestDto dto);
 
     @Mapping(target = "id", ignore = true)

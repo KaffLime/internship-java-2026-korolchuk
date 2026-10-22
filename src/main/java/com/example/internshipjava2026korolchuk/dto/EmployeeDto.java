@@ -3,10 +3,12 @@ package com.example.internshipjava2026korolchuk.dto;
 import com.example.internshipjava2026korolchuk.entity.Department;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Null;
 
 import java.time.LocalDate;
 
 public record EmployeeDto(
+        @Null
         Long id,
 
         @NotNull

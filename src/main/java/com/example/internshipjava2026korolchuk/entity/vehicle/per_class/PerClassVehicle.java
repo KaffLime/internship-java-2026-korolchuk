@@ -1,7 +1,5 @@
 package com.example.internshipjava2026korolchuk.entity.vehicle.per_class;
 
-import jakarta.persistence.DiscriminatorColumn;
-import jakarta.persistence.DiscriminatorType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;

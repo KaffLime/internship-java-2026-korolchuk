@@ -11,6 +11,7 @@ import org.mapstruct.NullValuePropertyMappingStrategy;
 public interface EmployeeMapper {
     EmployeeDto toDto(Employee employee);
 
+    @Mapping(target = "id", ignore = true)
     Employee toEntity(EmployeeDto dto);
 
     @Mapping(target = "id", ignore = true)
