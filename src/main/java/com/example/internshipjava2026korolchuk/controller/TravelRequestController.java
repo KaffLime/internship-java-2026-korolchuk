@@ -2,6 +2,7 @@ package com.example.internshipjava2026korolchuk.controller;
 
 import com.example.internshipjava2026korolchuk.dto.TravelRequestDto;
 import com.example.internshipjava2026korolchuk.entity.TravelRequestStatus;
+import com.example.internshipjava2026korolchuk.service.RequestHistoryService;
 import com.example.internshipjava2026korolchuk.service.TravelRequestService;
 import com.example.internshipjava2026korolchuk.specification.TravelRequestFilter;
 import jakarta.validation.Valid;
@@ -23,6 +24,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 public class TravelRequestController {
     private final TravelRequestService travelRequestService;
+    private final RequestHistoryService requestHistoryService;
 
     @GetMapping
     public Page<TravelRequestDto> getAllTravelRequests(@Valid TravelRequestFilter filter, Pageable pageable) {
