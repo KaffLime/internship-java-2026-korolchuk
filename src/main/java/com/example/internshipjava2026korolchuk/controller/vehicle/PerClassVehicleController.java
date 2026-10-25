@@ -39,6 +39,21 @@ public class PerClassVehicleController {
         return perClassVehicleService.getVehicleByModel(model);
     }
 
+    @GetMapping("/cars")
+    public List<PerClassCarDto> getAllCars() {
+        return perClassVehicleService.getAllCars();
+    }
+
+    @GetMapping("/planes")
+    public List<PerClassPlaneDto> getAllPlanes() {
+        return perClassVehicleService.getAllPlanes();
+    }
+
+    @GetMapping("/trains")
+    public List<PerClassTrainDto> getAllTrains() {
+        return perClassVehicleService.getAllTrains();
+    }
+
     @PostMapping("/cars")
     public PerClassCarDto createCar(@RequestBody PerClassCarDto car) {
         return perClassVehicleService.createCar(car);

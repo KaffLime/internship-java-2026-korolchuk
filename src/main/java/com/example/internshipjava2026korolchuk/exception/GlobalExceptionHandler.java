@@ -34,4 +34,17 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>("Сущность не найдена: "
                 + ex.getMessage(), HttpStatus.BAD_REQUEST);
     }
+
+    @ExceptionHandler(DateRangeException.class)
+    public ResponseEntity<String> handleDateRangeException(DateRangeException ex) {
+        return new ResponseEntity<>("Ошибка использования аннотации @DateRange. "
+                + ex.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    @ExceptionHandler(CannotUpdateTravelRequestWithStatusException.class)
+    public ResponseEntity<String> handleCannotUpdateTravelRequestWithStatusException(
+            CannotUpdateTravelRequestWithStatusException ex) {
+        return new ResponseEntity<>("Отказано в доступе. "
+                + ex.getMessage(), HttpStatus.BAD_REQUEST);
+    }
 }

@@ -2,7 +2,6 @@ package com.example.internshipjava2026korolchuk.entity.vehicle.single;
 
 import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -12,8 +11,14 @@ import lombok.Setter;
 @Getter
 @Setter
 @NoArgsConstructor
-@AllArgsConstructor
 public class SingleTrain extends SingleVehicle {
     Long carriagesCount;
     String trainType;
+
+    SingleTrain(Long id, String model, Long maxSpeed, Long fuelCapacity, Long carriagesCount, String trainType) {
+        super(id, model, maxSpeed, fuelCapacity);
+
+        this.carriagesCount = carriagesCount;
+        this.trainType = trainType;
+    }
 }

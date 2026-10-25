@@ -1,5 +1,6 @@
 package com.example.internshipjava2026korolchuk.specification;
 
+import com.example.internshipjava2026korolchuk.entity.Department;
 import com.example.internshipjava2026korolchuk.entity.Department_;
 import com.example.internshipjava2026korolchuk.entity.Employee;
 import com.example.internshipjava2026korolchuk.entity.Employee_;
@@ -16,7 +17,7 @@ public class EmployeeSpecs {
             }
 
             String pattern = "%" + fullName + "%";
-            return cb.like(root.get(Employee_.FULL_NAME), pattern);
+            return cb.like(cb.lower(root.get(Employee_.FULL_NAME)), cb.lower(cb.literal(pattern)));
         });
     }
 
@@ -27,7 +28,7 @@ public class EmployeeSpecs {
             }
 
             String pattern = "%" + email + "%";
-            return cb.like(root.get(Employee_.EMAIL), pattern);
+            return cb.like(cb.lower(root.get(Employee_.EMAIL)), cb.lower(cb.literal(pattern)));
         });
     }
 
@@ -38,17 +39,17 @@ public class EmployeeSpecs {
             }
 
             String pattern = "%" + position + "%";
-            return cb.like(root.get(Employee_.POSITION), pattern);
+            return cb.like(cb.lower(root.get(Employee_.POSITION)), cb.lower(cb.literal(pattern)));
         });
     }
 
-    public static Specification<Employee> inDepartment(Long id) {
+    public static Specification<Employee> inDepartment(Department dep) {
         return ((root, query, cb) -> {
-            if (id == null) {
+            if (dep == null) {
                 return null;
             }
 
-            return cb.equal(root.get(Employee_.DEPARTMENT).get(Department_.ID), id);
+            return cb.equal(root.get(Employee_.DEPARTMENT).get(Department_.ID), dep.getId());
         });
     }
 

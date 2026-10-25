@@ -65,7 +65,7 @@ public class TravelRequest {
 
     @Column(name = "status")
     @Enumerated(EnumType.STRING)
-    TravelRequestStatus status;
+    TravelRequestStatus status = TravelRequestStatus.DRAFT;
 
     @Column(name = "created_at", insertable = false, updatable = false)
     @Generated(event = EventType.INSERT)

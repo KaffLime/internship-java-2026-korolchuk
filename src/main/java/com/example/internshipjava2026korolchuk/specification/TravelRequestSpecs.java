@@ -1,6 +1,8 @@
 package com.example.internshipjava2026korolchuk.specification;
 
+import com.example.internshipjava2026korolchuk.entity.Department;
 import com.example.internshipjava2026korolchuk.entity.Department_;
+import com.example.internshipjava2026korolchuk.entity.Employee;
 import com.example.internshipjava2026korolchuk.entity.Employee_;
 import com.example.internshipjava2026korolchuk.entity.TravelRequest;
 import com.example.internshipjava2026korolchuk.entity.TravelRequestStatus;
@@ -12,23 +14,23 @@ import java.time.LocalDate;
 
 public class TravelRequestSpecs {
 
-    public static Specification<TravelRequest> forEmployee(Long id) {
+    public static Specification<TravelRequest> forEmployee(Employee emp) {
         return ((root, query, cb) -> {
-            if (id == null) {
+            if (emp == null) {
                 return null;
             }
 
-            return cb.equal(root.get(TravelRequest_.EMPLOYEE).get(Employee_.ID), id);
+            return cb.equal(root.get(TravelRequest_.EMPLOYEE).get(Employee_.ID), emp.getId());
         });
     }
 
-    public static Specification<TravelRequest> inDepartment(Long id) {
+    public static Specification<TravelRequest> inDepartment(Department dep) {
         return ((root, query, cb) -> {
-            if (id == null) {
+            if (dep == null) {
                 return null;
             }
 
-            return cb.equal(root.get(TravelRequest_.DEPARTMENT).get(Department_.ID), id);
+            return cb.equal(root.get(TravelRequest_.DEPARTMENT).get(Department_.ID), dep.getId());
         });
     }
 
@@ -38,7 +40,7 @@ public class TravelRequestSpecs {
                 return null;
             }
 
-            return cb.equal(root.get(TravelRequest_.DESTINATION), destination);
+            return cb.equal(cb.lower(root.get(TravelRequest_.DESTINATION)), cb.lower(cb.literal(destination)));
         });
     }
 
@@ -89,7 +91,7 @@ public class TravelRequestSpecs {
             }
 
             String pattern = "%" + purpose + "%";
-            return cb.like(root.get(TravelRequest_.PURPOSE), pattern);
+            return cb.like(cb.lower(root.get(TravelRequest_.PURPOSE)), cb.lower(cb.literal(pattern)));
         });
     }
 

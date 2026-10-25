@@ -39,6 +39,21 @@ public class SingleVehicleController {
         return singleVehicleService.getVehicleByModel(model);
     }
 
+    @GetMapping("/cars")
+    public List<SingleCarDto> getAllCars() {
+        return singleVehicleService.getAllCars();
+    }
+
+    @GetMapping("/planes")
+    public List<SinglePlaneDto> getAllPlanes() {
+        return singleVehicleService.getAllPlanes();
+    }
+
+    @GetMapping("/trains")
+    public List<SingleTrainDto> getAllTrains() {
+        return singleVehicleService.getAllTrains();
+    }
+
     @PostMapping("/cars")
     public SingleCarDto createCar(@RequestBody SingleCarDto car) {
         return singleVehicleService.createCar(car);

@@ -5,7 +5,6 @@ import com.example.internshipjava2026korolchuk.entity.Employee;
 import com.example.internshipjava2026korolchuk.entity.TravelRequestStatus;
 import com.example.internshipjava2026korolchuk.validator.DateRange;
 import jakarta.validation.constraints.DecimalMin;
-import jakarta.validation.constraints.Null;
 import jakarta.validation.constraints.Size;
 
 import java.math.BigDecimal;
@@ -13,7 +12,6 @@ import java.time.LocalDate;
 
 @DateRange
 public record TravelRequestDto(
-        @Null
         Long id,
         Employee employee,
         Department department,

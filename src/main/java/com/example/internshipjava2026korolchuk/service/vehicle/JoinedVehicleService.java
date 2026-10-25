@@ -12,11 +12,8 @@ import com.example.internshipjava2026korolchuk.mapper.vehicle.JoinedVehicleMappe
 import com.example.internshipjava2026korolchuk.repository.vehicle.JoinedVehicleRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 
@@ -27,20 +24,14 @@ import java.util.List;
 @RequiredArgsConstructor
 public class JoinedVehicleService {
     private final JoinedVehicleRepository joinedVehicleRepository;
-
     private final JoinedVehicleMapper joinedVehicleMapper;
 
-    @GetMapping
+    @Transactional(readOnly = true)
     public List<JoinedVehicleDto> getAllVehicle() {
-        ArrayList<JoinedVehicle> vehicleList = (ArrayList<JoinedVehicle>) joinedVehicleRepository.findAll();
-
-        ArrayList<JoinedVehicleDto> vehicleDtoList = (ArrayList<JoinedVehicleDto>) vehicleList
-                .stream().map(joinedVehicleMapper::toDto).toList();
-
-        return vehicleDtoList;
+        return joinedVehicleRepository.findAll().stream().map(joinedVehicleMapper::toDto).toList();
     }
 
-    @GetMapping("/{id}")
+    @Transactional(readOnly = true)
     public JoinedVehicleDto getVehicleById(@PathVariable Long id) {
         JoinedVehicle joinedVehicle = joinedVehicleRepository.findById(id)
                 .orElseThrow((() -> new RuntimeException("Joined транспорта с таким id не существует")));
@@ -48,29 +39,44 @@ public class JoinedVehicleService {
         return joinedVehicleMapper.toDto(joinedVehicle);
     }
 
-    @GetMapping("/search")
+    @Transactional(readOnly = true)
     public List<JoinedVehicleDto> getVehicleByModel(@RequestParam String model) {
         ArrayList<JoinedVehicle> joinedVehicles = (ArrayList<JoinedVehicle>) joinedVehicleRepository.findByModel(model);
 
         return joinedVehicles.stream().map(joinedVehicleMapper::toDto).toList();
     }
 
-    @PostMapping("/cars")
+    @Transactional(readOnly = true)
+    public List<JoinedCarDto> getAllCars() {
+        return joinedVehicleRepository.findAllCars().stream().map(joinedVehicleMapper::toDto).toList();
+    }
+
+    @Transactional(readOnly = true)
+    public List<JoinedPlaneDto> getAllPlanes() {
+        return joinedVehicleRepository.findAllPlanes().stream().map(joinedVehicleMapper::toDto).toList();
+    }
+
+    @Transactional(readOnly = true)
+    public List<JoinedTrainDto> getAllTrains() {
+        return joinedVehicleRepository.findAllTrains().stream().map(joinedVehicleMapper::toDto).toList();
+    }
+
+    @Transactional
     public JoinedCarDto createCar(@RequestBody JoinedCarDto car) {
         return joinedVehicleMapper.toDto(joinedVehicleRepository.save(joinedVehicleMapper.toEntity(car)));
     }
 
-    @PostMapping("/planes")
+    @Transactional
     public JoinedPlaneDto createPlane(@RequestBody JoinedPlaneDto plane) {
         return joinedVehicleMapper.toDto(joinedVehicleRepository.save(joinedVehicleMapper.toEntity(plane)));
     }
 
-    @PostMapping("/trains")
+    @Transactional
     public JoinedTrainDto createTrain(@RequestBody JoinedTrainDto train) {
         return joinedVehicleMapper.toDto(joinedVehicleRepository.save(joinedVehicleMapper.toEntity(train)));
     }
 
-    @PatchMapping("/cars/{id}")
+    @Transactional
     public JoinedCarDto updateCar(@PathVariable Long id, @RequestBody JoinedCarDto car) {
         JoinedVehicle savedVehicle = joinedVehicleRepository.findById(id)
                 .orElseThrow((() -> new RuntimeException("Joined транспорта с таким id не существует")));
@@ -84,7 +90,7 @@ public class JoinedVehicleService {
         return joinedVehicleMapper.toDto(joinedVehicleRepository.save(savedCar));
     }
 
-    @PatchMapping("/planes/{id}")
+    @Transactional
     public JoinedPlaneDto updatePlane(@PathVariable Long id, @RequestBody JoinedPlaneDto plane) {
         JoinedVehicle savedVehicle = joinedVehicleRepository.findById(id)
                 .orElseThrow((() -> new RuntimeException("Joined транспорта с таким id не существует")));
@@ -98,7 +104,7 @@ public class JoinedVehicleService {
         return joinedVehicleMapper.toDto(joinedVehicleRepository.save(savedPlane));
     }
 
-    @PatchMapping("/trains/{id}")
+    @Transactional
     public JoinedTrainDto updateTrain(@PathVariable Long id, @RequestBody JoinedTrainDto train) {
         JoinedVehicle savedVehicle = joinedVehicleRepository.findById(id)
                 .orElseThrow((() -> new RuntimeException("Joined транспорта с таким id не существует")));
@@ -112,7 +118,7 @@ public class JoinedVehicleService {
         return joinedVehicleMapper.toDto(joinedVehicleRepository.save(savedTrain));
     }
 
-    @DeleteMapping("/{id}")
+    @Transactional
     public void deleteVehicle(@PathVariable Long id) {
         joinedVehicleRepository.deleteById(id);
     }

@@ -11,8 +11,8 @@ public class DepartmentSpecs {
                 return null;
             }
 
-            String pattern = "%" + name + "%";
-            return cb.like(root.get(Department_.NAME), pattern);
+            String pattern = "%" + name.toLowerCase() + "%";
+            return cb.like(cb.lower(root.get(Department_.NAME)), cb.lower(cb.literal(pattern)));
         });
     }
 
@@ -23,7 +23,7 @@ public class DepartmentSpecs {
             }
 
             String pattern = "%" + code + "%";
-            return cb.like(root.get(Department_.CODE), pattern);
+            return cb.like(cb.lower(root.get(Department_.CODE)), cb.lower(cb.literal(pattern)));
         });
     }
 }

@@ -1,7 +1,7 @@
 package com.example.internshipjava2026korolchuk.controller;
 
 import com.example.internshipjava2026korolchuk.dto.TravelRequestDto;
-import com.example.internshipjava2026korolchuk.service.RequestHistoryService;
+import com.example.internshipjava2026korolchuk.entity.TravelRequestStatus;
 import com.example.internshipjava2026korolchuk.service.TravelRequestService;
 import com.example.internshipjava2026korolchuk.specification.TravelRequestFilter;
 import jakarta.validation.Valid;
@@ -15,14 +15,14 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/api/travelRequests")
+@RequestMapping("/api/travel-requests")
 @RequiredArgsConstructor
 public class TravelRequestController {
     private final TravelRequestService travelRequestService;
-    private final RequestHistoryService requestHistoryService;
 
     @GetMapping
     public Page<TravelRequestDto> getAllTravelRequests(@Valid TravelRequestFilter filter, Pageable pageable) {
@@ -42,9 +42,13 @@ public class TravelRequestController {
     @PatchMapping("/{id}")
     public TravelRequestDto updateTravelRequest(@PathVariable Long id,
                                                 @Valid @RequestBody TravelRequestDto travelRequestDTO) {
-        TravelRequestDto updatedTravelRequestDTO = travelRequestService.updateTravelRequest(id, travelRequestDTO);
-        requestHistoryService.createHistoryRecord(id, travelRequestDTO, updatedTravelRequestDTO);
-        return updatedTravelRequestDTO;
+        return travelRequestService.updateTravelRequest(id, travelRequestDTO);
+    }
+
+    @PatchMapping("/{id}/change-status")
+    public TravelRequestDto updateTravelRequestStatus(@PathVariable Long id,
+                                                      @RequestParam TravelRequestStatus status) {
+        return travelRequestService.updateTravelRequestStatus(id, status);
     }
 
     @DeleteMapping("/{id}")

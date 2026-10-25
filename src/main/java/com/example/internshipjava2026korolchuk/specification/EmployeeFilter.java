@@ -25,7 +25,7 @@ public class EmployeeFilter {
                 EmployeeSpecs.containsFullName(filter.getFullName()),
                 EmployeeSpecs.containsEmail(filter.getEmail()),
                 EmployeeSpecs.containsPosition(filter.getPosition()),
-                EmployeeSpecs.inDepartment(filter.department.getId()),
+                EmployeeSpecs.inDepartment(filter.department),
                 EmployeeSpecs.hiredAfterDate(filter.getAfterHireDate()),
                 EmployeeSpecs.hiredBeforeDate(filter.getBeforeHireDate())
         );

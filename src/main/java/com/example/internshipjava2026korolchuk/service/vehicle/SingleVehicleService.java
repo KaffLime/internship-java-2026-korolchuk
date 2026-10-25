@@ -12,11 +12,8 @@ import com.example.internshipjava2026korolchuk.mapper.vehicle.SingleVehicleMappe
 import com.example.internshipjava2026korolchuk.repository.vehicle.SingleVehicleRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 
@@ -27,20 +24,14 @@ import java.util.List;
 @RequiredArgsConstructor
 public class SingleVehicleService {
     private final SingleVehicleRepository singleVehicleRepository;
-
     private final SingleVehicleMapper singleVehicleMapper;
 
-    @GetMapping
+    @Transactional(readOnly = true)
     public List<SingleVehicleDto> getAllVehicle() {
-        ArrayList<SingleVehicle> vehicleList = (ArrayList<SingleVehicle>) singleVehicleRepository.findAll();
-
-        ArrayList<SingleVehicleDto> vehicleDtoList = (ArrayList<SingleVehicleDto>) vehicleList
-                .stream().map(singleVehicleMapper::toDto).toList();
-
-        return vehicleDtoList;
+        return singleVehicleRepository.findAll().stream().map(singleVehicleMapper::toDto).toList();
     }
 
-    @GetMapping("/{id}")
+    @Transactional(readOnly = true)
     public SingleVehicleDto getVehicleById(@PathVariable Long id) {
         SingleVehicle singleVehicle = singleVehicleRepository.findById(id)
                 .orElseThrow((() -> new RuntimeException("Single транспорта с таким id не существует")));
@@ -48,29 +39,44 @@ public class SingleVehicleService {
         return singleVehicleMapper.toDto(singleVehicle);
     }
 
-    @GetMapping("/search")
+    @Transactional(readOnly = true)
     public List<SingleVehicleDto> getVehicleByModel(@RequestParam String model) {
         ArrayList<SingleVehicle> singleVehicles = (ArrayList<SingleVehicle>) singleVehicleRepository.findByModel(model);
 
         return singleVehicles.stream().map(singleVehicleMapper::toDto).toList();
     }
 
-    @PostMapping("/cars")
+    @Transactional(readOnly = true)
+    public List<SingleCarDto> getAllCars() {
+        return singleVehicleRepository.findAllCars().stream().map(singleVehicleMapper::toDto).toList();
+    }
+
+    @Transactional(readOnly = true)
+    public List<SinglePlaneDto> getAllPlanes() {
+        return singleVehicleRepository.findAllPlanes().stream().map(singleVehicleMapper::toDto).toList();
+    }
+
+    @Transactional(readOnly = true)
+    public List<SingleTrainDto> getAllTrains() {
+        return singleVehicleRepository.findAllTrains().stream().map(singleVehicleMapper::toDto).toList();
+    }
+
+    @Transactional
     public SingleCarDto createCar(@RequestBody SingleCarDto car) {
         return singleVehicleMapper.toDto(singleVehicleRepository.save(singleVehicleMapper.toEntity(car)));
     }
 
-    @PostMapping("/planes")
+    @Transactional
     public SinglePlaneDto createPlane(@RequestBody SinglePlaneDto plane) {
         return singleVehicleMapper.toDto(singleVehicleRepository.save(singleVehicleMapper.toEntity(plane)));
     }
 
-    @PostMapping("/trains")
+    @Transactional
     public SingleTrainDto createTrain(@RequestBody SingleTrainDto train) {
         return singleVehicleMapper.toDto(singleVehicleRepository.save(singleVehicleMapper.toEntity(train)));
     }
 
-    @PatchMapping("/cars/{id}")
+    @Transactional
     public SingleCarDto updateCar(@PathVariable Long id, @RequestBody SingleCarDto car) {
         SingleVehicle savedVehicle = singleVehicleRepository.findById(id)
                 .orElseThrow((() -> new RuntimeException("Single транспорта с таким id не существует")));
@@ -84,7 +90,7 @@ public class SingleVehicleService {
         return singleVehicleMapper.toDto(singleVehicleRepository.save(savedCar));
     }
 
-    @PatchMapping("/planes/{id}")
+    @Transactional
     public SinglePlaneDto updatePlane(@PathVariable Long id, @RequestBody SinglePlaneDto plane) {
         SingleVehicle savedVehicle = singleVehicleRepository.findById(id)
                 .orElseThrow((() -> new RuntimeException("Single транспорта с таким id не существует")));
@@ -98,7 +104,7 @@ public class SingleVehicleService {
         return singleVehicleMapper.toDto(singleVehicleRepository.save(savedPlane));
     }
 
-    @PatchMapping("/trains/{id}")
+    @Transactional
     public SingleTrainDto updateTrain(@PathVariable Long id, @RequestBody SingleTrainDto train) {
         SingleVehicle savedVehicle = singleVehicleRepository.findById(id)
                 .orElseThrow((() -> new RuntimeException("Single транспорта с таким id не существует")));
@@ -112,7 +118,7 @@ public class SingleVehicleService {
         return singleVehicleMapper.toDto(singleVehicleRepository.save(savedTrain));
     }
 
-    @DeleteMapping("/{id}")
+    @Transactional
     public void deleteVehicle(@PathVariable Long id) {
         singleVehicleRepository.deleteById(id);
     }

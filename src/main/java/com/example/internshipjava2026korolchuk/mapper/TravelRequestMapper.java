@@ -12,6 +12,7 @@ public interface TravelRequestMapper {
     TravelRequestDto toDto(TravelRequest travelRequest);
 
     @Mapping(target = "id", ignore = true)
+    @Mapping(target = "status", ignore = true)
     TravelRequest toEntity(TravelRequestDto dto);
 
     @Mapping(target = "id", ignore = true)

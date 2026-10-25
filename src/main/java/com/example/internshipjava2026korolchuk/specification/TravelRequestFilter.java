@@ -39,8 +39,8 @@ public class TravelRequestFilter {
 
     public static Specification<TravelRequest> byFilter(TravelRequestFilter filter) {
         return Specification.allOf(
-                TravelRequestSpecs.forEmployee(filter.employee.getId()),
-                TravelRequestSpecs.inDepartment(filter.department.getId()),
+                TravelRequestSpecs.forEmployee(filter.employee),
+                TravelRequestSpecs.inDepartment(filter.department),
                 TravelRequestSpecs.hasDestination(filter.getDestination()),
                 TravelRequestSpecs.startingAfterDate(filter.getAfterStartDate()),
                 TravelRequestSpecs.startingBeforeDate(filter.getBeforeStartDate()),

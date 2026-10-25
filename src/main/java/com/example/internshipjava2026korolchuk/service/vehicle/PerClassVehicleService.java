@@ -12,11 +12,8 @@ import com.example.internshipjava2026korolchuk.mapper.vehicle.PerClassVehicleMap
 import com.example.internshipjava2026korolchuk.repository.vehicle.PerClassVehicleRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 
@@ -27,20 +24,14 @@ import java.util.List;
 @RequiredArgsConstructor
 public class PerClassVehicleService {
     private final PerClassVehicleRepository perClassVehicleRepository;
-
     private final PerClassVehicleMapper perClassVehicleMapper;
 
-    @GetMapping
+    @Transactional(readOnly = true)
     public List<PerClassVehicleDto> getAllVehicle() {
-        ArrayList<PerClassVehicle> vehicleList = (ArrayList<PerClassVehicle>) perClassVehicleRepository.findAll();
-
-        ArrayList<PerClassVehicleDto> vehicleDtoList = (ArrayList<PerClassVehicleDto>) vehicleList
-                .stream().map(perClassVehicleMapper::toDto).toList();
-
-        return vehicleDtoList;
+        return perClassVehicleRepository.findAll().stream().map(perClassVehicleMapper::toDto).toList();
     }
 
-    @GetMapping("/{id}")
+    @Transactional(readOnly = true)
     public PerClassVehicleDto getVehicleById(@PathVariable Long id) {
         PerClassVehicle perClassVehicle = perClassVehicleRepository.findById(id)
                 .orElseThrow((() -> new RuntimeException("PerClass транспорта с таким id не существует")));
@@ -48,29 +39,44 @@ public class PerClassVehicleService {
         return perClassVehicleMapper.toDto(perClassVehicle);
     }
 
-    @GetMapping("/search")
+    @Transactional(readOnly = true)
     public List<PerClassVehicleDto> getVehicleByModel(@RequestParam String model) {
         ArrayList<PerClassVehicle> perClassVehicles = (ArrayList<PerClassVehicle>) perClassVehicleRepository.findByModel(model);
 
         return perClassVehicles.stream().map(perClassVehicleMapper::toDto).toList();
     }
 
-    @PostMapping("/cars")
+    @Transactional(readOnly = true)
+    public List<PerClassCarDto> getAllCars() {
+        return perClassVehicleRepository.findAllCars().stream().map(perClassVehicleMapper::toDto).toList();
+    }
+
+    @Transactional(readOnly = true)
+    public List<PerClassPlaneDto> getAllPlanes() {
+        return perClassVehicleRepository.findAllPlanes().stream().map(perClassVehicleMapper::toDto).toList();
+    }
+
+    @Transactional(readOnly = true)
+    public List<PerClassTrainDto> getAllTrains() {
+        return perClassVehicleRepository.findAllTrains().stream().map(perClassVehicleMapper::toDto).toList();
+    }
+
+    @Transactional
     public PerClassCarDto createCar(@RequestBody PerClassCarDto car) {
         return perClassVehicleMapper.toDto(perClassVehicleRepository.save(perClassVehicleMapper.toEntity(car)));
     }
 
-    @PostMapping("/planes")
+    @Transactional
     public PerClassPlaneDto createPlane(@RequestBody PerClassPlaneDto plane) {
         return perClassVehicleMapper.toDto(perClassVehicleRepository.save(perClassVehicleMapper.toEntity(plane)));
     }
 
-    @PostMapping("/trains")
+    @Transactional
     public PerClassTrainDto createTrain(@RequestBody PerClassTrainDto train) {
         return perClassVehicleMapper.toDto(perClassVehicleRepository.save(perClassVehicleMapper.toEntity(train)));
     }
 
-    @PatchMapping("/cars/{id}")
+    @Transactional
     public PerClassCarDto updateCar(@PathVariable Long id, @RequestBody PerClassCarDto car) {
         PerClassVehicle savedVehicle = perClassVehicleRepository.findById(id)
                 .orElseThrow((() -> new RuntimeException("PerClass транспорта с таким id не существует")));
@@ -84,7 +90,7 @@ public class PerClassVehicleService {
         return perClassVehicleMapper.toDto(perClassVehicleRepository.save(savedCar));
     }
 
-    @PatchMapping("/planes/{id}")
+    @Transactional
     public PerClassPlaneDto updatePlane(@PathVariable Long id, @RequestBody PerClassPlaneDto plane) {
         PerClassVehicle savedVehicle = perClassVehicleRepository.findById(id)
                 .orElseThrow((() -> new RuntimeException("PerClass транспорта с таким id не существует")));
@@ -98,7 +104,7 @@ public class PerClassVehicleService {
         return perClassVehicleMapper.toDto(perClassVehicleRepository.save(savedPlane));
     }
 
-    @PatchMapping("/trains/{id}")
+    @Transactional
     public PerClassTrainDto updateTrain(@PathVariable Long id, @RequestBody PerClassTrainDto train) {
         PerClassVehicle savedVehicle = perClassVehicleRepository.findById(id)
                 .orElseThrow((() -> new RuntimeException("PerClass транспорта с таким id не существует")));
@@ -112,7 +118,7 @@ public class PerClassVehicleService {
         return perClassVehicleMapper.toDto(perClassVehicleRepository.save(savedTrain));
     }
 
-    @DeleteMapping("/{id}")
+    @Transactional
     public void deleteVehicle(@PathVariable Long id) {
         perClassVehicleRepository.deleteById(id);
     }

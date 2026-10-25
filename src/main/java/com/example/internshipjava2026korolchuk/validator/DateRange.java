@@ -14,4 +14,8 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface DateRange {
     String message() default "Дата начала позже даты окончания";
+
+    String startDate() default "startDate";
+
+    String endDate() default "endDate";
 }

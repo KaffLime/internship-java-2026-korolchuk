@@ -39,6 +39,21 @@ public class JoinedVehicleController {
         return joinedVehicleService.getVehicleByModel(model);
     }
 
+    @GetMapping("/cars")
+    public List<JoinedCarDto> getAllCars() {
+        return joinedVehicleService.getAllCars();
+    }
+
+    @GetMapping("/planes")
+    public List<JoinedPlaneDto> getAllPlanes() {
+        return joinedVehicleService.getAllPlanes();
+    }
+
+    @GetMapping("/trains")
+    public List<JoinedTrainDto> getAllTrains() {
+        return joinedVehicleService.getAllTrains();
+    }
+
     @PostMapping("/cars")
     public JoinedCarDto createCar(@RequestBody JoinedCarDto car) {
         return joinedVehicleService.createCar(car);

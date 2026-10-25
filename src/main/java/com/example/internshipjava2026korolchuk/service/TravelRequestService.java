@@ -2,6 +2,8 @@ package com.example.internshipjava2026korolchuk.service;
 
 import com.example.internshipjava2026korolchuk.dto.TravelRequestDto;
 import com.example.internshipjava2026korolchuk.entity.TravelRequest;
+import com.example.internshipjava2026korolchuk.entity.TravelRequestStatus;
+import com.example.internshipjava2026korolchuk.exception.CannotUpdateTravelRequestWithStatusException;
 import com.example.internshipjava2026korolchuk.mapper.TravelRequestMapper;
 import com.example.internshipjava2026korolchuk.repository.TravelRequestRepository;
 import com.example.internshipjava2026korolchuk.specification.TravelRequestFilter;
@@ -18,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class TravelRequestService {
     private final TravelRequestRepository travelRequestRepository;
     private final TravelRequestMapper travelRequestMapper;
+    private final RequestHistoryService requestHistoryService;
 
     @Transactional(readOnly = true)
     public Page<TravelRequestDto> getAllTravelRequests(TravelRequestFilter filter, Pageable pageable) {
@@ -43,9 +46,34 @@ public class TravelRequestService {
         TravelRequest travelRequest = travelRequestRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Заявка с id '" + id + "' не найдена"));
 
+        TravelRequestStatus status = travelRequest.getStatus();
+
+        if (status == TravelRequestStatus.APPROVED || status == TravelRequestStatus.REJECTED) {
+            throw new CannotUpdateTravelRequestWithStatusException(
+                    "Нельзя обновлять заявку в статусе " + status);
+        }
+
         travelRequestMapper.updateTravelRequestFromDto(travelRequestDto, travelRequest);
 
         return travelRequestMapper.toDto(travelRequestRepository.save(travelRequest));
+    }
+
+    @Transactional
+    public TravelRequestDto updateTravelRequestStatus(Long id, TravelRequestStatus newStatus) {
+        TravelRequest travelRequest = travelRequestRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Заявка с id '" + id + "' не найдена"));
+
+        if (travelRequest.getStatus() == newStatus) {
+            throw new CannotUpdateTravelRequestWithStatusException("Заявка уже находится в указанном статусе");
+        }
+
+        TravelRequestStatus oldStatus = travelRequest.getStatus();
+        travelRequest.setStatus(newStatus);
+
+        TravelRequest savedTravelRequest = travelRequestRepository.save(travelRequest);
+        requestHistoryService.createHistoryRecord(travelRequest, oldStatus);
+
+        return travelRequestMapper.toDto(savedTravelRequest);
     }
 
     @Transactional
