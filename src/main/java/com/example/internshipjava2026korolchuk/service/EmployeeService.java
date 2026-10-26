@@ -9,6 +9,7 @@ import com.example.internshipjava2026korolchuk.mapper.EmployeeMapper;
 import com.example.internshipjava2026korolchuk.repository.EmployeeRepository;
 import com.example.internshipjava2026korolchuk.specification.EmployeeFilter;
 import jakarta.persistence.EntityManager;
+import com.example.starter.logging.Logginable;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.persistence.PersistenceContext;
 import lombok.RequiredArgsConstructor;
@@ -29,6 +30,7 @@ public class EmployeeService {
     private EntityManager entityManager;
 
     @Transactional(readOnly = true)
+    @Logginable
     public Page<EmployeeResponseDto> getAllEmployees(EmployeeFilter filter, Pageable pageable) {
         Specification<Employee> spec = EmployeeFilter.byFilter(filter);
         Page<Employee> page = employeeRepository.findAll(spec, pageable);
@@ -37,12 +39,14 @@ public class EmployeeService {
     }
 
     @Transactional(readOnly = true)
+    @Logginable
     public EmployeeResponseDto getEmployeeById(Long id) {
         return employeeMapper.toDto(employeeRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Пользователь с id '" + id + "' не найден")));
     }
 
     @Transactional
+    @Logginable
     public EmployeeResponseDto createEmployee(EmployeeCreationDto dto) {
         if (dto.departmentId() == null) {
             throw new NotValidDtoException("Сотрудник не может существовать без отдела");
@@ -55,6 +59,7 @@ public class EmployeeService {
     }
 
     @Transactional
+    @Logginable
     public EmployeeResponseDto updateEmployee(Long id, EmployeeUpdatingDto dto) {
         Employee employee = employeeRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Пользователь с id '" + id + "' не найден"));
@@ -68,11 +73,13 @@ public class EmployeeService {
     }
 
     @Transactional
+    @Logginable
     public void deleteEmployee(Long id) {
         employeeRepository.deleteById(id);
     }
 
     @Transactional
+    @Logginable
     public long getEmployeesCountInDepartment(Long id) {
         return employeeRepository.countByDepartmentId(id);
     }
