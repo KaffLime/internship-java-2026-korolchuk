@@ -8,6 +8,7 @@ import com.example.internshipjava2026korolchuk.exception.CannotDeleteEntityExcep
 import com.example.internshipjava2026korolchuk.mapper.DepartmentMapper;
 import com.example.internshipjava2026korolchuk.repository.DepartmentRepository;
 import com.example.internshipjava2026korolchuk.specification.DepartmentFilter;
+import com.example.starter.logging.Logginable;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -25,6 +26,7 @@ public class DepartmentService {
     private final EmployeeService employeeService;
 
     @Transactional(readOnly = true)
+    @Logginable
     public Page<DepartmentResponseDto> getAllDepartments(DepartmentFilter filter, Pageable pageable) {
         Specification<Department> spec = DepartmentFilter.byFilter(filter);
         Page<Department> page = departmentRepository.findAll(spec, pageable);
@@ -33,17 +35,20 @@ public class DepartmentService {
     }
 
     @Transactional(readOnly = true)
+    @Logginable
     public DepartmentResponseDto getDepartmentById(Long id) {
         return departmentMapper.toDto(departmentRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Подразделение с id '" + id + "' не найдено")));
     }
 
     @Transactional
+    @Logginable
     public DepartmentResponseDto createDepartment(DepartmentCreationDto dto) {
         return departmentMapper.toDto(departmentRepository.save(departmentMapper.toEntity(dto)));
     }
 
     @Transactional
+    @Logginable
     public DepartmentResponseDto updateDepartment(Long id, DepartmentUpdatingDto dto) {
         Department department = departmentRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Подразделение с id '" + id + "' не найдено"));
@@ -54,6 +59,7 @@ public class DepartmentService {
     }
 
     @Transactional
+    @Logginable
     public void deleteDepartment(Long id) {
         if (employeeService.getEmployeesCountInDepartment(id) > 0) {
             throw new CannotDeleteEntityException("Удалить подразделение с id '"

@@ -11,6 +11,7 @@ import com.example.internshipjava2026korolchuk.mapper.TravelRequestMapper;
 import com.example.internshipjava2026korolchuk.repository.TravelRequestRepository;
 import com.example.internshipjava2026korolchuk.specification.TravelRequestFilter;
 import jakarta.persistence.EntityManager;
+import com.example.starter.logging.Logginable;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.persistence.PersistenceContext;
 import lombok.RequiredArgsConstructor;
@@ -32,6 +33,7 @@ public class TravelRequestService {
     private EntityManager entityManager;
 
     @Transactional(readOnly = true)
+    @Logginable
     public Page<TravelRequestResponseDto> getAllTravelRequests(TravelRequestFilter filter, Pageable pageable) {
         Specification<TravelRequest> spec = TravelRequestFilter.byFilter(filter);
         Page<TravelRequest> page = travelRequestRepository.findAll(spec, pageable);
@@ -40,12 +42,14 @@ public class TravelRequestService {
     }
 
     @Transactional(readOnly = true)
+    @Logginable
     public TravelRequestResponseDto getTravelRequestById(Long id) {
         return travelRequestMapper.toDto(travelRequestRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Заявка с id '" + id + "' не найдена")));
     }
 
     @Transactional
+    @Logginable
     public TravelRequestResponseDto createTravelRequest(TravelRequestCreationDto dto) {
         if (dto.departmentId() == null || dto.employeeId() == null) {
             throw new NotValidDtoException("Заявка не может существовать без отдела или сотрудника");
@@ -58,6 +62,7 @@ public class TravelRequestService {
     }
 
     @Transactional
+    @Logginable
     public TravelRequestResponseDto updateTravelRequest(Long id, TravelRequestUpdatingDto dto) {
         TravelRequest travelRequest = travelRequestRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Заявка с id '" + id + "' не найдена"));
@@ -78,6 +83,7 @@ public class TravelRequestService {
     }
 
     @Transactional
+    @Logginable
     public TravelRequestResponseDto updateTravelRequestStatus(Long id, TravelRequestStatus newStatus) {
         TravelRequest travelRequest = travelRequestRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Заявка с id '" + id + "' не найдена"));
@@ -96,6 +102,7 @@ public class TravelRequestService {
     }
 
     @Transactional
+    @Logginable
     public void deleteTravelRequest(Long id) {
         travelRequestRepository.deleteById(id);
     }
