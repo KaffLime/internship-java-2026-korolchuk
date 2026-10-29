@@ -14,11 +14,4 @@ import lombok.Setter;
 public class SingleTrain extends SingleVehicle {
     Long carriagesCount;
     String trainType;
-
-    SingleTrain(Long id, String model, Long maxSpeed, Long fuelCapacity, Long carriagesCount, String trainType) {
-        super(id, model, maxSpeed, fuelCapacity);
-
-        this.carriagesCount = carriagesCount;
-        this.trainType = trainType;
-    }
 }

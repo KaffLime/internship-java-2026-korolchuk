@@ -1,19 +1,32 @@
 package com.example.internshipjava2026korolchuk.mapper;
 
-import com.example.internshipjava2026korolchuk.dto.EmployeeDto;
+import com.example.internshipjava2026korolchuk.dto.EmployeeCreationDto;
+import com.example.internshipjava2026korolchuk.dto.EmployeeResponseDto;
+import com.example.internshipjava2026korolchuk.dto.EmployeeUpdatingDto;
+import com.example.internshipjava2026korolchuk.entity.Department;
 import com.example.internshipjava2026korolchuk.entity.Employee;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
-import org.mapstruct.NullValuePropertyMappingStrategy;
 
-@Mapper(componentModel = "spring", nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
+@Mapper(componentModel = "spring")
 public interface EmployeeMapper {
-    EmployeeDto toDto(Employee employee);
 
-    @Mapping(target = "id", ignore = true)
-    Employee toEntity(EmployeeDto dto);
+    EmployeeResponseDto toDto(Employee employee);
 
-    @Mapping(target = "id", ignore = true)
-    void updateEmployeeFromDto(EmployeeDto dto, @MappingTarget Employee employee);
+    @Mapping(source = "departmentId", target = "department")
+    Employee toEntity(EmployeeCreationDto dto);
+
+    void updateEmployeeFromDto(EmployeeUpdatingDto dto, @MappingTarget Employee employee);
+
+    default Department map(Long id) {
+        if (id == null) {
+            return null;
+        }
+
+        Department dep = new Department();
+        dep.setId(id);
+
+        return dep;
+    }
 }

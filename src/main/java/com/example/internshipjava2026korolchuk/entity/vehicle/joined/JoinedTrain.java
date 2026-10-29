@@ -12,11 +12,4 @@ import lombok.Setter;
 public class JoinedTrain extends JoinedVehicle {
     Long carriagesCount;
     String trainType;
-
-    JoinedTrain(Long id, String model, Long maxSpeed, Long fuelCapacity, Long carriagesCount, String trainType) {
-        super(id, model, maxSpeed, fuelCapacity);
-
-        this.carriagesCount = carriagesCount;
-        this.trainType = trainType;
-    }
 }

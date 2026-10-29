@@ -1,19 +1,18 @@
 package com.example.internshipjava2026korolchuk.mapper;
 
-import com.example.internshipjava2026korolchuk.dto.DepartmentDto;
+import com.example.internshipjava2026korolchuk.dto.DepartmentCreationDto;
+import com.example.internshipjava2026korolchuk.dto.DepartmentResponseDto;
+import com.example.internshipjava2026korolchuk.dto.DepartmentUpdatingDto;
 import com.example.internshipjava2026korolchuk.entity.Department;
 import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
-import org.mapstruct.NullValuePropertyMappingStrategy;
 
-@Mapper(componentModel = "spring", nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
+@Mapper(componentModel = "spring")
 public interface DepartmentMapper {
-    DepartmentDto toDto(Department department);
 
-    @Mapping(target = "id", ignore = true)
-    Department toEntity(DepartmentDto dto);
+    DepartmentResponseDto toDto(Department department);
 
-    @Mapping(target = "id", ignore = true)
-    void updateDepartmentFromDto(DepartmentDto dto, @MappingTarget Department department);
+    Department toEntity(DepartmentCreationDto dto);
+
+    void updateDepartmentFromDto(DepartmentUpdatingDto dto, @MappingTarget Department department);
 }

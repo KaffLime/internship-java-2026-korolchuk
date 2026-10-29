@@ -23,20 +23,23 @@ public class DateRangeValidator implements ConstraintValidator<DateRange, Object
     public boolean isValid(Object object, ConstraintValidatorContext context) {
         Object startDate = getValue(object, startDateField);
         Object endDate = getValue(object, endDateField);
+        boolean isValid;
 
         if (startDate instanceof LocalDate start && endDate instanceof LocalDate end) {
-            return !end.isBefore(start);
+            isValid = !end.isBefore(start);
         } else if (startDate instanceof LocalDateTime start && endDate instanceof LocalDateTime end) {
-            return !end.isBefore(start);
+            isValid = !end.isBefore(start);
+        } else {
+            throw new DateRangeException("DateRange: поля должны иметь тип LocalDate или LocalDateTime");
         }
 
-        throw new DateRangeException("DateRange: поля должны иметь тип LocalDate или LocalDateTime");
+        return isValid;
     }
 
     private Object getValue(Object object, String fieldName) {
         Class<?> clazz = object.getClass();
-        Field field = null;
-        Object value = null;
+        Field field;
+        Object value;
 
         try {
             field = clazz.getDeclaredField(fieldName);

@@ -12,12 +12,18 @@ import java.util.List;
 import java.util.Optional;
 
 public interface EmployeeRepository extends JpaRepository<Employee, Long> {
+
     @EntityGraph(attributePaths = {"department"})
     Page<Employee> findAll(Specification<Employee> spec, Pageable pageable);
 
-    @Query(value = "SELECT * FROM employees", nativeQuery = true)
-    List<Employee> findAllWithDepartment();
-
     @EntityGraph(attributePaths = {"department"})
     Optional<Employee> findById(Long id);
+
+    long countByDepartmentId(Long id);
+
+    @EntityGraph(attributePaths = {"department"})
+    List<Employee> findAll();
+
+    @Query(value = "SELECT * FROM employees", nativeQuery = true)
+    List<Employee> findAllWithDepartment();
 }

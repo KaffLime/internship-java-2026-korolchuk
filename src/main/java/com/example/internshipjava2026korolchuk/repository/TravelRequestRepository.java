@@ -10,9 +10,10 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.Optional;
 
 public interface TravelRequestRepository extends JpaRepository<TravelRequest, Long> {
+
     @EntityGraph(attributePaths = {"department", "employee"})
     Page<TravelRequest> findAll(Specification<TravelRequest> spec, Pageable pageable);
 
     @EntityGraph(attributePaths = {"department", "employee"})
-    Optional<TravelRequest> findById(Long aLong);
+    Optional<TravelRequest> findById(Long id);
 }

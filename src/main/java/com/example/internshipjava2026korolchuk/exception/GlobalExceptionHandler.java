@@ -1,7 +1,9 @@
 package com.example.internshipjava2026korolchuk.exception;
 
+import com.example.internshipjava2026korolchuk.dto.ExceptionDto;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.ConstraintViolationException;
+import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -12,39 +14,67 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(IllegalArgumentException.class)
-    public ResponseEntity<String> handleIllegalArgumentException(IllegalArgumentException ex) {
-        return new ResponseEntity<>("Переданы невалидные параметры пагинации или сортировки: "
-                + ex.getMessage(), HttpStatus.BAD_REQUEST);
+    public ResponseEntity<ExceptionDto> handleIllegalArgumentException(IllegalArgumentException ex) {
+        ExceptionDto exDto = new ExceptionDto(ex,
+                "Переданы невалидные параметры пагинации или сортировки");
+
+        return new ResponseEntity<>(exDto, HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<String> handleMethodArgumentNotValidException(MethodArgumentNotValidException ex) {
-        return new ResponseEntity<>("Переданы невалидные значения сущности: "
-                + ex.getMessage(), HttpStatus.BAD_REQUEST);
+    public ResponseEntity<ExceptionDto> handleMethodArgumentNotValidException(MethodArgumentNotValidException ex) {
+        ExceptionDto exDto = new ExceptionDto(ex, "Переданы невалидные значения сущности");
+
+        String message = ex.getBindingResult().getAllErrors().stream()
+                .findFirst()
+                .map(DefaultMessageSourceResolvable::getDefaultMessage)
+                .orElse("Ошибка валидации");
+
+        exDto.setMessage(message);
+
+        return new ResponseEntity<>(exDto, HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(ConstraintViolationException.class)
-    public ResponseEntity<String> handleConstraintViolationException(ConstraintViolationException ex) {
-        return new ResponseEntity<>("Невалидное состояние сущности: "
-                + ex.getMessage(), HttpStatus.BAD_REQUEST);
+    public ResponseEntity<ExceptionDto> handleConstraintViolationException(ConstraintViolationException ex) {
+        ExceptionDto exDto = new ExceptionDto(ex, "Невалидное состояние сущности");
+
+        return new ResponseEntity<>(exDto, HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(EntityNotFoundException.class)
-    public ResponseEntity<String> handleEntityNotFoundException(EntityNotFoundException ex) {
-        return new ResponseEntity<>("Сущность не найдена: "
-                + ex.getMessage(), HttpStatus.BAD_REQUEST);
+    public ResponseEntity<ExceptionDto> handleEntityNotFoundException(EntityNotFoundException ex) {
+        ExceptionDto exDto = new ExceptionDto(ex, "Сущность не найдена");
+
+        return new ResponseEntity<>(exDto, HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(DateRangeException.class)
-    public ResponseEntity<String> handleDateRangeException(DateRangeException ex) {
-        return new ResponseEntity<>("Ошибка использования аннотации @DateRange. "
-                + ex.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+    public ResponseEntity<ExceptionDto> handleDateRangeException(DateRangeException ex) {
+        ExceptionDto exDto = new ExceptionDto(ex, "Ошибка использования аннотации @DateRange");
+
+        return new ResponseEntity<>(exDto, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
     @ExceptionHandler(CannotUpdateTravelRequestWithStatusException.class)
-    public ResponseEntity<String> handleCannotUpdateTravelRequestWithStatusException(
+    public ResponseEntity<ExceptionDto> handleCannotUpdateTravelRequestWithStatusException(
             CannotUpdateTravelRequestWithStatusException ex) {
-        return new ResponseEntity<>("Отказано в доступе. "
-                + ex.getMessage(), HttpStatus.BAD_REQUEST);
+        ExceptionDto exDto = new ExceptionDto(ex, "Отказано в доступе изменения статуса заявки");
+
+        return new ResponseEntity<>(exDto, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(CannotDeleteEntityException.class)
+    public ResponseEntity<ExceptionDto> handleCannotDeleteEntityException(CannotDeleteEntityException ex) {
+        ExceptionDto exDto = new ExceptionDto(ex, "Отказано в доступе удаления сущности");
+
+        return new ResponseEntity<>(exDto, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(NotValidDtoException.class)
+    public ResponseEntity<ExceptionDto> handleNotValidDtoException(NotValidDtoException ex) {
+        ExceptionDto exDto = new ExceptionDto(ex, "Невалидное тело запроса");
+
+        return new ResponseEntity<>(exDto, HttpStatus.BAD_REQUEST);
     }
 }

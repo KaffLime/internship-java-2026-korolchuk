@@ -12,11 +12,4 @@ import lombok.Setter;
 public class JoinedPlane extends JoinedVehicle {
     String planeType;
     Long massClass;
-
-    JoinedPlane(Long id, String model, Long maxSpeed, Long fuelCapacity, String planeType, Long massClass) {
-        super(id, model, maxSpeed, fuelCapacity);
-
-        this.planeType = planeType;
-        this.massClass = massClass;
-    }
 }

@@ -17,12 +17,12 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Service
 @RequiredArgsConstructor
 public class SingleVehicleService {
+
     private final SingleVehicleRepository singleVehicleRepository;
     private final SingleVehicleMapper singleVehicleMapper;
 
@@ -41,9 +41,7 @@ public class SingleVehicleService {
 
     @Transactional(readOnly = true)
     public List<SingleVehicleDto> getVehicleByModel(@RequestParam String model) {
-        ArrayList<SingleVehicle> singleVehicles = (ArrayList<SingleVehicle>) singleVehicleRepository.findByModel(model);
-
-        return singleVehicles.stream().map(singleVehicleMapper::toDto).toList();
+        return singleVehicleRepository.findByModel(model).stream().map(singleVehicleMapper::toDto).toList();
     }
 
     @Transactional(readOnly = true)

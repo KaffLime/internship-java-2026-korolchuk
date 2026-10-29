@@ -12,11 +12,4 @@ import lombok.Setter;
 public class PerClassPlane extends PerClassVehicle {
     String planeType;
     Long massClass;
-
-    PerClassPlane(Long id, String model, Long maxSpeed, Long fuelCapacity, String planeType, Long massClass) {
-        super(id, model, maxSpeed, fuelCapacity);
-
-        this.planeType = planeType;
-        this.massClass = massClass;
-    }
 }

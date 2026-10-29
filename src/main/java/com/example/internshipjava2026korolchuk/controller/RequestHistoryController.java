@@ -1,6 +1,6 @@
 package com.example.internshipjava2026korolchuk.controller;
 
-import com.example.internshipjava2026korolchuk.dto.RequestHistoryDto;
+import com.example.internshipjava2026korolchuk.dto.RequestHistoryResponseDto;
 import com.example.internshipjava2026korolchuk.service.RequestHistoryService;
 import com.example.internshipjava2026korolchuk.specification.RequestHistoryFilter;
 import jakarta.validation.Valid;
@@ -15,23 +15,24 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/api/history")
+@RequestMapping("/api/v1/history")
 @RequiredArgsConstructor
 public class RequestHistoryController {
+
     private final RequestHistoryService requestHistoryService;
 
     @GetMapping
-    public Page<RequestHistoryDto> getWholeHistory(@Valid RequestHistoryFilter filter, Pageable pageable) {
+    public Page<RequestHistoryResponseDto> getWholeHistory(@Valid RequestHistoryFilter filter, Pageable pageable) {
         return requestHistoryService.getWholeHistory(filter, pageable);
     }
 
     @GetMapping("/{id}")
-    public RequestHistoryDto getHistoryRecordById(@PathVariable Long id) {
+    public RequestHistoryResponseDto getHistoryRecordById(@PathVariable Long id) {
         return requestHistoryService.getHistoryRecordById(id);
     }
 
     @PatchMapping("/{id}")
-    public RequestHistoryDto updateHistoryRecord(@PathVariable Long id, @RequestParam String message) {
+    public RequestHistoryResponseDto updateHistoryRecord(@PathVariable Long id, @RequestParam String message) {
         return requestHistoryService.updateHistoryRecord(id, message);
     }
 }

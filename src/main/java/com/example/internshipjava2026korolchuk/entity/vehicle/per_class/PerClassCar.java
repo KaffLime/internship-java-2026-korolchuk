@@ -13,13 +13,4 @@ public class PerClassCar extends PerClassVehicle {
     String licensePlate;
     String vin;
     Boolean used;
-
-    PerClassCar(Long id, String model, Long maxSpeed, Long fuelCapacity,
-                String licensePlate, String vin, Boolean used) {
-        super(id, model, maxSpeed, fuelCapacity);
-
-        this.licensePlate = licensePlate;
-        this.vin = vin;
-        this.used = used;
-    }
 }

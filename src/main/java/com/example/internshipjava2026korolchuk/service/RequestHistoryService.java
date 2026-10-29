@@ -1,6 +1,6 @@
 package com.example.internshipjava2026korolchuk.service;
 
-import com.example.internshipjava2026korolchuk.dto.RequestHistoryDto;
+import com.example.internshipjava2026korolchuk.dto.RequestHistoryResponseDto;
 import com.example.internshipjava2026korolchuk.entity.RequestHistory;
 import com.example.internshipjava2026korolchuk.entity.TravelRequest;
 import com.example.internshipjava2026korolchuk.entity.TravelRequestStatus;
@@ -18,11 +18,12 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @RequiredArgsConstructor
 public class RequestHistoryService {
+
     private final RequestHistoryRepository requestHistoryRepository;
     private final RequestHistoryMapper requestHistoryMapper;
 
     @Transactional(readOnly = true)
-    public Page<RequestHistoryDto> getWholeHistory(RequestHistoryFilter filter, Pageable pageable) {
+    public Page<RequestHistoryResponseDto> getWholeHistory(RequestHistoryFilter filter, Pageable pageable) {
         Specification<RequestHistory> spec = RequestHistoryFilter.byFilter(filter);
         Page<RequestHistory> page = requestHistoryRepository.findAll(spec, pageable);
 
@@ -30,7 +31,7 @@ public class RequestHistoryService {
     }
 
     @Transactional(readOnly = true)
-    public RequestHistoryDto getHistoryRecordById(Long id) {
+    public RequestHistoryResponseDto getHistoryRecordById(Long id) {
         return requestHistoryMapper.toDto(requestHistoryRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Запись истории с id '" + id + "' не найдена")));
     }
@@ -44,7 +45,7 @@ public class RequestHistoryService {
     }
 
     @Transactional
-    public RequestHistoryDto updateHistoryRecord(Long id, String comment) {
+    public RequestHistoryResponseDto updateHistoryRecord(Long id, String comment) {
         RequestHistory requestHistory = requestHistoryRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Запись истории с id '" + id + "' не найдена"));
 
