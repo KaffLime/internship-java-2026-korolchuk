@@ -6,12 +6,10 @@ import org.aspectj.lang.annotation.Aspect;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.event.Level;
-import org.springframework.stereotype.Component;
 
 import java.util.Arrays;
 
 @Aspect
-@Component
 public class LoggingAspect {
 
     private static final Logger log = LoggerFactory.getLogger(LoggingAspect.class);
@@ -28,7 +26,7 @@ public class LoggingAspect {
         long last = System.currentTimeMillis();
 
         log.atLevel(Level.valueOf(properties.getLevel()))
-                .setMessage("Method '{}' with arguments {} was executed in {} millis and returned '{}'")
+                .setMessage("\nMethod '{}' \nwith arguments {} \nwas executed in {} millis \nand returned '{}'")
                 .addArgument(pjp.getSignature().getName())
                 .addArgument(Arrays.toString(pjp.getArgs()))
                 .addArgument(last - start)
