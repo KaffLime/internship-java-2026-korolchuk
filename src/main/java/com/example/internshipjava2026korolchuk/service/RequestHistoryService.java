@@ -1,57 +1,63 @@
 package com.example.internshipjava2026korolchuk.service;
 
-import com.example.internshipjava2026korolchuk.dto.TravelRequestDto;
+import com.example.internshipjava2026korolchuk.dto.RequestHistoryResponseDto;
 import com.example.internshipjava2026korolchuk.entity.RequestHistory;
 import com.example.internshipjava2026korolchuk.entity.TravelRequest;
+import com.example.internshipjava2026korolchuk.entity.TravelRequestStatus;
+import com.example.internshipjava2026korolchuk.mapper.RequestHistoryMapper;
 import com.example.internshipjava2026korolchuk.repository.RequestHistoryRepository;
-import com.example.internshipjava2026korolchuk.repository.TravelRequestRepository;
+import com.example.internshipjava2026korolchuk.specification.RequestHistoryFilter;
+import com.example.starter.logging.Logginable;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
 public class RequestHistoryService {
+
     private final RequestHistoryRepository requestHistoryRepository;
-    private final TravelRequestRepository travelRequestRepository;
+    private final RequestHistoryMapper requestHistoryMapper;
 
     @Transactional(readOnly = true)
-    public List<RequestHistory> getWholeHistory() {
-        return requestHistoryRepository.findAll();
+    @Logginable
+    public Page<RequestHistoryResponseDto> getWholeHistory(RequestHistoryFilter filter, Pageable pageable) {
+        Specification<RequestHistory> spec = RequestHistoryFilter.byFilter(filter);
+        Page<RequestHistory> page = requestHistoryRepository.findAll(spec, pageable);
+
+        return page.map(requestHistoryMapper::toDto);
     }
 
     @Transactional(readOnly = true)
-    public RequestHistory getHistoryRecordById(Long id) {
-        return requestHistoryRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Записи в истории с таким id не существует"));
+    @Logginable
+    public RequestHistoryResponseDto getHistoryRecordById(Long id) {
+        return requestHistoryMapper.toDto(requestHistoryRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Запись истории с id '" + id + "' не найдена")));
     }
 
     @Transactional
-    public void createHistoryRecord(Long travelRequestId, TravelRequestDto travelRequest,
-                                    TravelRequestDto updatedTravelRequest) {
-        TravelRequest foundTravelRequest = travelRequestRepository.findById(travelRequestId)
-                .orElseThrow(() -> new RuntimeException("Заявки с таким id не существует"));
-
+    @Logginable
+    public void createHistoryRecord(TravelRequest travelRequest, TravelRequestStatus oldStatus) {
         requestHistoryRepository.save(new RequestHistory(
-                null, foundTravelRequest, travelRequest.status(),
-                updatedTravelRequest.status(), null, "Запись успешно добавлена")
+                null, travelRequest, oldStatus,
+                travelRequest.getStatus(), null, "Запись успешно обновлена")
         );
     }
 
     @Transactional
-    public RequestHistory updateHistoryRecord(Long id, String comment) {
-        RequestHistory foundRequestHistory = requestHistoryRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Записи в истории с таким id не существует"));
+    @Logginable
+    public RequestHistoryResponseDto updateHistoryRecord(Long id, String comment) {
+        RequestHistory requestHistory = requestHistoryRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Запись истории с id '" + id + "' не найдена"));
 
-        foundRequestHistory.setComment(comment);
+        if (comment != null) {
+            requestHistory.setComment(comment);
+        }
 
-        return requestHistoryRepository.save(foundRequestHistory);
-    }
-
-    @Transactional
-    public void deleteRequestHistory(Long id) {
-        requestHistoryRepository.deleteById(id);
+        return requestHistoryMapper.toDto(requestHistoryRepository.save(requestHistory));
     }
 }

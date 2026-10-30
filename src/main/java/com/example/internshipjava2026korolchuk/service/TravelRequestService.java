@@ -1,56 +1,108 @@
 package com.example.internshipjava2026korolchuk.service;
 
-import com.example.internshipjava2026korolchuk.dto.TravelRequestDto;
+import com.example.internshipjava2026korolchuk.dto.TravelRequestCreationDto;
+import com.example.internshipjava2026korolchuk.dto.TravelRequestResponseDto;
+import com.example.internshipjava2026korolchuk.dto.TravelRequestUpdatingDto;
 import com.example.internshipjava2026korolchuk.entity.TravelRequest;
+import com.example.internshipjava2026korolchuk.entity.TravelRequestStatus;
+import com.example.internshipjava2026korolchuk.exception.CannotUpdateTravelRequestWithStatusException;
+import com.example.internshipjava2026korolchuk.exception.NotValidDtoException;
 import com.example.internshipjava2026korolchuk.mapper.TravelRequestMapper;
 import com.example.internshipjava2026korolchuk.repository.TravelRequestRepository;
+import com.example.internshipjava2026korolchuk.specification.TravelRequestFilter;
+import jakarta.persistence.EntityManager;
+import com.example.starter.logging.Logginable;
+import jakarta.persistence.EntityNotFoundException;
+import jakarta.persistence.PersistenceContext;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.ArrayList;
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
 public class TravelRequestService {
+
     private final TravelRequestRepository travelRequestRepository;
     private final TravelRequestMapper travelRequestMapper;
+    private final RequestHistoryService requestHistoryService;
+
+    @PersistenceContext
+    private EntityManager entityManager;
 
     @Transactional(readOnly = true)
-    public List<TravelRequestDto> getAllTravelRequests() {
-        ArrayList<TravelRequest> travelRequests = (ArrayList<TravelRequest>) travelRequestRepository.findAll();
-        ArrayList<TravelRequestDto> travelRequestDtos = new ArrayList<>();
+    @Logginable
+    public Page<TravelRequestResponseDto> getAllTravelRequests(TravelRequestFilter filter, Pageable pageable) {
+        Specification<TravelRequest> spec = TravelRequestFilter.byFilter(filter);
+        Page<TravelRequest> page = travelRequestRepository.findAll(spec, pageable);
 
-        for (TravelRequest travelRequest : travelRequests) {
-            travelRequestDtos.add(travelRequestMapper.toDto(travelRequest));
+        return page.map(travelRequestMapper::toDto);
+    }
+
+    @Transactional(readOnly = true)
+    @Logginable
+    public TravelRequestResponseDto getTravelRequestById(Long id) {
+        return travelRequestMapper.toDto(travelRequestRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Заявка с id '" + id + "' не найдена")));
+    }
+
+    @Transactional
+    @Logginable
+    public TravelRequestResponseDto createTravelRequest(TravelRequestCreationDto dto) {
+        if (dto.departmentId() == null || dto.employeeId() == null) {
+            throw new NotValidDtoException("Заявка не может существовать без отдела или сотрудника");
         }
 
-        return travelRequestDtos;
-    }
+        TravelRequest tr = travelRequestRepository.saveAndFlush(travelRequestMapper.toEntity(dto));
+        entityManager.refresh(tr);
 
-    @Transactional(readOnly = true)
-    public TravelRequestDto getTravelRequestById(Long id) {
-        return travelRequestMapper.toDto(travelRequestRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Командировки с таким id не существует")));
+        return travelRequestMapper.toDto(tr);
     }
 
     @Transactional
-    public TravelRequestDto createTravelRequest(TravelRequestDto travelRequestDto) {
-        return travelRequestMapper.toDto(travelRequestRepository.save(travelRequestMapper.toEntity(travelRequestDto)));
-    }
-
-    @Transactional
-    public TravelRequestDto updateTravelRequest(Long id, TravelRequestDto travelRequestDto) {
+    @Logginable
+    public TravelRequestResponseDto updateTravelRequest(Long id, TravelRequestUpdatingDto dto) {
         TravelRequest travelRequest = travelRequestRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Командировки с таким id не существует"));
+                .orElseThrow(() -> new EntityNotFoundException("Заявка с id '" + id + "' не найдена"));
 
-        travelRequestMapper.updateTravelRequestFromDto(travelRequestDto, travelRequest);
+        TravelRequestStatus status = travelRequest.getStatus();
 
-        return travelRequestMapper.toDto(travelRequestRepository.save(travelRequest));
+        if (status == TravelRequestStatus.APPROVED || status == TravelRequestStatus.REJECTED) {
+            throw new CannotUpdateTravelRequestWithStatusException(
+                    "Нельзя обновлять заявку в статусе " + status);
+        }
+
+        travelRequestMapper.updateTravelRequestFromDto(dto, travelRequest);
+
+        TravelRequest tr = travelRequestRepository.saveAndFlush(travelRequest);
+        entityManager.refresh(tr);
+
+        return travelRequestMapper.toDto(tr);
     }
 
     @Transactional
+    @Logginable
+    public TravelRequestResponseDto updateTravelRequestStatus(Long id, TravelRequestStatus newStatus) {
+        TravelRequest travelRequest = travelRequestRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Заявка с id '" + id + "' не найдена"));
+
+        if (travelRequest.getStatus() == newStatus) {
+            throw new CannotUpdateTravelRequestWithStatusException("Заявка уже находится в указанном статусе");
+        }
+
+        TravelRequestStatus oldStatus = travelRequest.getStatus();
+        travelRequest.setStatus(newStatus);
+
+        TravelRequest savedTravelRequest = travelRequestRepository.save(travelRequest);
+        requestHistoryService.createHistoryRecord(travelRequest, oldStatus);
+
+        return travelRequestMapper.toDto(savedTravelRequest);
+    }
+
+    @Transactional
+    @Logginable
     public void deleteTravelRequest(Long id) {
         travelRequestRepository.deleteById(id);
     }
