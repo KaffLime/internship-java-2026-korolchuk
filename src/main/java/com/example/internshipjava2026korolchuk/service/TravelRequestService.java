@@ -10,6 +10,10 @@ import com.example.internshipjava2026korolchuk.exception.NotValidDtoException;
 import com.example.internshipjava2026korolchuk.mapper.TravelRequestMapper;
 import com.example.internshipjava2026korolchuk.repository.TravelRequestRepository;
 import com.example.internshipjava2026korolchuk.specification.TravelRequestFilter;
+import io.micrometer.core.instrument.Counter;
+import io.micrometer.core.instrument.DistributionSummary;
+import io.micrometer.core.instrument.Metrics;
+import jakarta.annotation.PostConstruct;
 import jakarta.persistence.EntityManager;
 import com.example.starter.logging.Logginable;
 import jakarta.persistence.EntityNotFoundException;
@@ -21,6 +25,10 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.temporal.ChronoUnit;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
+
 @Service
 @RequiredArgsConstructor
 public class TravelRequestService {
@@ -29,8 +37,22 @@ public class TravelRequestService {
     private final TravelRequestMapper travelRequestMapper;
     private final RequestHistoryService requestHistoryService;
 
+    private AtomicLong rejectedRequestsCounter;
+    private final DistributionSummary requestsDurationSummary = DistributionSummary
+            .builder("requests.duration")
+            .description("Продолжительность командировок")
+            .baseUnit("дни")
+            .register(Metrics.globalRegistry);
+
     @PersistenceContext
     private EntityManager entityManager;
+
+    @PostConstruct
+    public void registerRejectedRequestsMetric() {
+        long count = travelRequestRepository.countByStatus(TravelRequestStatus.REJECTED);
+        rejectedRequestsCounter = new AtomicLong(count);
+        Metrics.gauge("requests.rejected.currently", rejectedRequestsCounter);
+    }
 
     @Transactional(readOnly = true)
     @Logginable
@@ -57,6 +79,8 @@ public class TravelRequestService {
 
         TravelRequest tr = travelRequestRepository.saveAndFlush(travelRequestMapper.toEntity(dto));
         entityManager.refresh(tr);
+
+        requestsDurationSummary.record(ChronoUnit.DAYS.between(tr.getStartDate(), tr.getEndDate()) + 1);
 
         return travelRequestMapper.toDto(tr);
     }
@@ -98,6 +122,14 @@ public class TravelRequestService {
         TravelRequest savedTravelRequest = travelRequestRepository.save(travelRequest);
         requestHistoryService.createHistoryRecord(travelRequest, oldStatus);
 
+        if (newStatus == TravelRequestStatus.REJECTED) {
+            rejectedRequestsCounter.incrementAndGet();
+        } else if (oldStatus == TravelRequestStatus.REJECTED) {
+            if (rejectedRequestsCounter.get() > 0) {
+                rejectedRequestsCounter.decrementAndGet();
+            }
+        }
+
         return travelRequestMapper.toDto(savedTravelRequest);
     }
 
@@ -105,5 +137,17 @@ public class TravelRequestService {
     @Logginable
     public void deleteTravelRequest(Long id) {
         travelRequestRepository.deleteById(id);
+    }
+
+    @Transactional
+    @Logginable
+    public long countByEmployee(Long id) {
+        return travelRequestRepository.countByEmployeeId(id);
+    }
+
+    @Transactional
+    @Logginable
+    public long countByDepartment(Long id) {
+        return travelRequestRepository.countByDepartmentId(id);
     }
 }

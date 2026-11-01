@@ -3,11 +3,16 @@ package com.example.internshipjava2026korolchuk.service;
 import com.example.internshipjava2026korolchuk.dto.EmployeeCreationDto;
 import com.example.internshipjava2026korolchuk.dto.EmployeeResponseDto;
 import com.example.internshipjava2026korolchuk.dto.EmployeeUpdatingDto;
+import com.example.internshipjava2026korolchuk.entity.Department;
 import com.example.internshipjava2026korolchuk.entity.Employee;
+import com.example.internshipjava2026korolchuk.exception.CannotDeleteEntityException;
 import com.example.internshipjava2026korolchuk.exception.NotValidDtoException;
 import com.example.internshipjava2026korolchuk.mapper.EmployeeMapper;
 import com.example.internshipjava2026korolchuk.repository.EmployeeRepository;
 import com.example.internshipjava2026korolchuk.specification.EmployeeFilter;
+import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.Metrics;
+import jakarta.annotation.PostConstruct;
 import jakarta.persistence.EntityManager;
 import com.example.starter.logging.Logginable;
 import jakarta.persistence.EntityNotFoundException;
@@ -25,6 +30,7 @@ public class EmployeeService {
 
     private final EmployeeRepository employeeRepository;
     private final EmployeeMapper employeeMapper;
+    private final TravelRequestService travelRequestService;
 
     @PersistenceContext
     private EntityManager entityManager;
@@ -75,12 +81,17 @@ public class EmployeeService {
     @Transactional
     @Logginable
     public void deleteEmployee(Long id) {
+        if (travelRequestService.countByEmployee(id) > 0) {
+            throw new CannotDeleteEntityException("Удалить сотрудника с id '"
+                    + id + "' невозможно, у него имеются заявки");
+        }
+
         employeeRepository.deleteById(id);
     }
 
     @Transactional
     @Logginable
-    public long getEmployeesCountInDepartment(Long id) {
+    public long countInDepartment(Long id) {
         return employeeRepository.countByDepartmentId(id);
     }
 }
