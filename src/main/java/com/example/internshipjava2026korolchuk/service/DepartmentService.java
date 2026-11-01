@@ -4,6 +4,7 @@ import com.example.internshipjava2026korolchuk.dto.DepartmentCreationDto;
 import com.example.internshipjava2026korolchuk.dto.DepartmentResponseDto;
 import com.example.internshipjava2026korolchuk.dto.DepartmentUpdatingDto;
 import com.example.internshipjava2026korolchuk.entity.Department;
+import com.example.internshipjava2026korolchuk.entity.TravelRequest_;
 import com.example.internshipjava2026korolchuk.exception.CannotDeleteEntityException;
 import com.example.internshipjava2026korolchuk.mapper.DepartmentMapper;
 import com.example.internshipjava2026korolchuk.repository.DepartmentRepository;
@@ -24,6 +25,7 @@ public class DepartmentService {
     private final DepartmentRepository departmentRepository;
     private final DepartmentMapper departmentMapper;
     private final EmployeeService employeeService;
+    private final TravelRequestService travelRequestService;
 
     @Transactional(readOnly = true)
     @Logginable
@@ -61,9 +63,14 @@ public class DepartmentService {
     @Transactional
     @Logginable
     public void deleteDepartment(Long id) {
-        if (employeeService.getEmployeesCountInDepartment(id) > 0) {
+        if (employeeService.countInDepartment(id) > 0) {
             throw new CannotDeleteEntityException("Удалить подразделение с id '"
                     + id + "' невозможно, в нем находятся сотрудники");
+        }
+
+        if (travelRequestService.countByDepartment(id) > 0) {
+            throw new CannotDeleteEntityException("Удалить подразделение с id '"
+                    + id + "' невозможно, в нем находятся заявки");
         }
 
         departmentRepository.deleteById(id);

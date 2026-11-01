@@ -1,6 +1,7 @@
 package com.example.internshipjava2026korolchuk.repository;
 
 import com.example.internshipjava2026korolchuk.entity.TravelRequest;
+import com.example.internshipjava2026korolchuk.entity.TravelRequestStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -16,4 +17,8 @@ public interface TravelRequestRepository extends JpaRepository<TravelRequest, Lo
 
     @EntityGraph(attributePaths = {"department", "employee"})
     Optional<TravelRequest> findById(Long id);
+
+    long countByStatus(TravelRequestStatus status);
+    long countByEmployeeId(Long id);
+    long countByDepartmentId(Long id);
 }
