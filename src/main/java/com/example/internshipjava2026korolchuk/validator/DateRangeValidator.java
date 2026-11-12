@@ -23,6 +23,11 @@ public class DateRangeValidator implements ConstraintValidator<DateRange, Object
     public boolean isValid(Object object, ConstraintValidatorContext context) {
         Object startDate = getValue(object, startDateField);
         Object endDate = getValue(object, endDateField);
+
+        if (startDate == null || endDate == null) {
+            return true;
+        }
+
         boolean isValid;
 
         if (startDate instanceof LocalDate start && endDate instanceof LocalDate end) {
@@ -47,10 +52,6 @@ public class DateRangeValidator implements ConstraintValidator<DateRange, Object
             value = field.get(object);
         } catch (NoSuchFieldException | IllegalAccessException e) {
             throw new DateRangeException("DateRange: не удалось получить поля дат", e);
-        }
-
-        if (value == null) {
-            throw new DateRangeException("DateRange: не удалось получить поля дат");
         }
 
         return value;

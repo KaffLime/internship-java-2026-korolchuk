@@ -26,4 +26,6 @@ public interface EmployeeRepository extends JpaRepository<Employee, Long> {
 
     @Query(value = "SELECT * FROM employees", nativeQuery = true)
     List<Employee> findAllWithDepartment();
+
+    boolean existsByEmail(String email);
 }

@@ -19,6 +19,8 @@ public interface TravelRequestRepository extends JpaRepository<TravelRequest, Lo
     Optional<TravelRequest> findById(Long id);
 
     long countByStatus(TravelRequestStatus status);
+
     long countByEmployeeId(Long id);
+
     long countByDepartmentId(Long id);
 }

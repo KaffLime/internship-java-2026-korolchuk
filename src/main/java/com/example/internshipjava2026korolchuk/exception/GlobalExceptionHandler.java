@@ -4,6 +4,7 @@ import com.example.internshipjava2026korolchuk.dto.ExceptionDto;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.ConstraintViolationException;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
+import org.springframework.core.convert.ConversionFailedException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -57,14 +58,11 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(EntityNotFoundException.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
     public ResponseEntity<ExceptionDto> handleEntityNotFoundException(EntityNotFoundException ex) {
         ExceptionDto exDto = new ExceptionDto(ex, "Сущность не найдена");
 
-        return ResponseEntity
-                .badRequest()
-                .contentType(MediaType.APPLICATION_JSON)
-                .body(exDto);
+        return new ResponseEntity<>(exDto, HttpStatus.NOT_FOUND);
     }
 
     @ExceptionHandler(DateRangeException.class)
@@ -108,6 +106,17 @@ public class GlobalExceptionHandler {
 
         return ResponseEntity
                 .badRequest()
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(exDto);
+    }
+
+    @ExceptionHandler(ConversionFailedException.class)
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    public ResponseEntity<ExceptionDto> handleConversionFailedException(ConversionFailedException ex) {
+        ExceptionDto exDto = new ExceptionDto(ex, "Неправильные настройки приложения");
+
+        return ResponseEntity
+                .internalServerError()
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(exDto);
     }
