@@ -12,6 +12,9 @@ public class ExceptionDto {
     LocalDateTime dateTime;
     String defaultMessage = null;
 
+    public ExceptionDto() {
+    }
+
     public ExceptionDto(Exception ex) {
         message = ex.getMessage();
         className = ex.getClass().getName();

@@ -4,15 +4,17 @@ import com.example.internshipjava2026korolchuk.dto.EmployeeCreationDto;
 import com.example.internshipjava2026korolchuk.dto.EmployeeResponseDto;
 import com.example.internshipjava2026korolchuk.dto.EmployeeUpdatingDto;
 import com.example.internshipjava2026korolchuk.entity.Employee;
+import com.example.internshipjava2026korolchuk.exception.CannotDeleteEntityException;
 import com.example.internshipjava2026korolchuk.exception.NotValidDtoException;
 import com.example.internshipjava2026korolchuk.mapper.EmployeeMapper;
 import com.example.internshipjava2026korolchuk.repository.EmployeeRepository;
 import com.example.internshipjava2026korolchuk.specification.EmployeeFilter;
-import jakarta.persistence.EntityManager;
 import com.example.starter.logging.Logginable;
+import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.persistence.PersistenceContext;
 import lombok.RequiredArgsConstructor;
+import org.apache.coyote.BadRequestException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -25,6 +27,7 @@ public class EmployeeService {
 
     private final EmployeeRepository employeeRepository;
     private final EmployeeMapper employeeMapper;
+    private final TravelRequestService travelRequestService;
 
     @PersistenceContext
     private EntityManager entityManager;
@@ -52,6 +55,10 @@ public class EmployeeService {
             throw new NotValidDtoException("Сотрудник не может существовать без отдела");
         }
 
+        if (employeeRepository.existsByEmail(dto.email())) {
+            throw new NotValidDtoException("Попробуйте использовать другой email");
+        }
+
         Employee emp = employeeRepository.saveAndFlush(employeeMapper.toEntity(dto));
         entityManager.refresh(emp);
 
@@ -64,6 +71,10 @@ public class EmployeeService {
         Employee employee = employeeRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Пользователь с id '" + id + "' не найден"));
 
+        if (dto.email() != null && employeeRepository.existsByEmail(dto.email())) {
+            throw new NotValidDtoException("Попробуйте использовать другой email");
+        }
+
         employeeMapper.updateEmployeeFromDto(dto, employee);
 
         Employee emp = employeeRepository.saveAndFlush(employee);
@@ -75,12 +86,20 @@ public class EmployeeService {
     @Transactional
     @Logginable
     public void deleteEmployee(Long id) {
+        employeeRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Пользователь с id '" + id + "' не найден"));
+
+        if (travelRequestService.countByEmployee(id) > 0) {
+            throw new CannotDeleteEntityException("Удалить сотрудника с id '"
+                    + id + "' невозможно, у него имеются заявки");
+        }
+
         employeeRepository.deleteById(id);
     }
 
     @Transactional
     @Logginable
-    public long getEmployeesCountInDepartment(Long id) {
+    public long countInDepartment(Long id) {
         return employeeRepository.countByDepartmentId(id);
     }
 }

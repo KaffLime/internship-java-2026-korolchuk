@@ -5,7 +5,6 @@ import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.slf4j.event.Level;
 
 import java.util.Arrays;
 
@@ -25,7 +24,7 @@ public class LoggingAspect {
         Object result = pjp.proceed();
         long last = System.currentTimeMillis();
 
-        log.atLevel(Level.valueOf(properties.getLevel()))
+        log.atLevel(properties.getLevel())
                 .setMessage("\nMethod '{}' \nwith arguments {} \nwas executed in {} millis \nand returned '{}'")
                 .addArgument(pjp.getSignature().getName())
                 .addArgument(Arrays.toString(pjp.getArgs()))

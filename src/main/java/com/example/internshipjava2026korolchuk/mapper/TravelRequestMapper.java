@@ -6,9 +6,11 @@ import com.example.internshipjava2026korolchuk.dto.TravelRequestUpdatingDto;
 import com.example.internshipjava2026korolchuk.entity.Department;
 import com.example.internshipjava2026korolchuk.entity.Employee;
 import com.example.internshipjava2026korolchuk.entity.TravelRequest;
+import org.mapstruct.BeanMapping;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
+import org.mapstruct.NullValuePropertyMappingStrategy;
 
 @Mapper(componentModel = "spring")
 public interface TravelRequestMapper {
@@ -19,6 +21,7 @@ public interface TravelRequestMapper {
     @Mapping(source = "departmentId", target = "department")
     TravelRequest toEntity(TravelRequestCreationDto dto);
 
+    @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     void updateTravelRequestFromDto(TravelRequestUpdatingDto dto, @MappingTarget TravelRequest travelRequest);
 
     default Employee mapEmployee(Long id) {
