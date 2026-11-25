@@ -9,6 +9,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
@@ -35,7 +36,7 @@ public class Employee {
     @NotNull
     String fullName;
 
-    @Column(name = "email")
+    @Column(name = "email", unique = true)
     @Email
     String email;
 

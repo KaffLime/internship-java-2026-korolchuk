@@ -4,8 +4,8 @@ import com.example.internshipjava2026korolchuk.dto.DepartmentCreationDto;
 import com.example.internshipjava2026korolchuk.dto.DepartmentResponseDto;
 import com.example.internshipjava2026korolchuk.dto.DepartmentUpdatingDto;
 import com.example.internshipjava2026korolchuk.entity.Department;
-import com.example.internshipjava2026korolchuk.entity.TravelRequest_;
 import com.example.internshipjava2026korolchuk.exception.CannotDeleteEntityException;
+import com.example.internshipjava2026korolchuk.exception.NotValidDtoException;
 import com.example.internshipjava2026korolchuk.mapper.DepartmentMapper;
 import com.example.internshipjava2026korolchuk.repository.DepartmentRepository;
 import com.example.internshipjava2026korolchuk.specification.DepartmentFilter;
@@ -46,6 +46,10 @@ public class DepartmentService {
     @Transactional
     @Logginable
     public DepartmentResponseDto createDepartment(DepartmentCreationDto dto) {
+        if (departmentRepository.existsByCode(dto.code())) {
+            throw new NotValidDtoException("Попробуйте использовать другой код");
+        }
+
         return departmentMapper.toDto(departmentRepository.save(departmentMapper.toEntity(dto)));
     }
 
@@ -55,6 +59,10 @@ public class DepartmentService {
         Department department = departmentRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Подразделение с id '" + id + "' не найдено"));
 
+        if (dto.code() != null && departmentRepository.existsByCode(dto.code())) {
+            throw new NotValidDtoException("Попробуйте использовать другой код");
+        }
+
         departmentMapper.updateDepartmentFromDto(dto, department);
 
         return departmentMapper.toDto(departmentRepository.save(department));
@@ -63,6 +71,9 @@ public class DepartmentService {
     @Transactional
     @Logginable
     public void deleteDepartment(Long id) {
+        departmentRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Подразделение с id '" + id + "' не найдено"));
+
         if (employeeService.countInDepartment(id) > 0) {
             throw new CannotDeleteEntityException("Удалить подразделение с id '"
                     + id + "' невозможно, в нем находятся сотрудники");
