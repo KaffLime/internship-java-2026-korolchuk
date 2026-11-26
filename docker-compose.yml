@@ -24,7 +24,35 @@ services:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/BusinessTrips
     depends_on:
       postgres:
-          condition: service_healthy
+        condition: service_healthy
+  mongodb:
+    image: mongo:9.0.8
+    container_name: travel_requests_history_mongodb
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGODB_PASSWORD:-admin}
+    healthcheck:
+      test: [ "CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping')" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+    volumes:
+      - mongo-data:/var/lib/mongodb/data
+  notification-service:
+    build:
+      context: ../notification-service-internship-java-2026-korolchuk
+      dockerfile: Dockerfile
+    ports:
+      - "8081:8081"
+    environment:
+      SPRING_MONGODB_URI: mongodb://admin:${MONGODB_PASSWORD:-admin}@mongodb:27017/TravelRequestHistory?authSource=admin
+    depends_on:
+      mongodb:
+        condition: service_healthy
 
 volumes:
   pgdata:
+  mongo-data:

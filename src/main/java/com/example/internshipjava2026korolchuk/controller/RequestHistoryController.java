@@ -1,6 +1,8 @@
 package com.example.internshipjava2026korolchuk.controller;
 
+import com.example.internshipjava2026korolchuk.dto.NotificationResponseDto;
 import com.example.internshipjava2026korolchuk.dto.RequestHistoryResponseDto;
+import com.example.internshipjava2026korolchuk.feign.NotificationServiceClient;
 import com.example.internshipjava2026korolchuk.service.RequestHistoryService;
 import com.example.internshipjava2026korolchuk.specification.RequestHistoryFilter;
 import io.swagger.v3.oas.annotations.Operation;
@@ -30,6 +32,13 @@ public class RequestHistoryController {
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     public Page<RequestHistoryResponseDto> getWholeHistory(@Valid RequestHistoryFilter filter, Pageable pageable) {
         return requestHistoryService.getWholeHistory(filter, pageable);
+    }
+
+    @Tag(name = "Get")
+    @Operation(summary = "Get all history records by travel request id")
+    @GetMapping(value = "/request/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public Page<NotificationResponseDto> getHistoryByTravelRequestId(@PathVariable Long id, Pageable pageable) {
+        return requestHistoryService.getHistoryByTravelRequestId(id, pageable);
     }
 
     @Tag(name = "Get")

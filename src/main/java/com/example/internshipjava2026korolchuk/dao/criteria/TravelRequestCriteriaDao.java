@@ -14,6 +14,7 @@ import java.time.LocalDate;
 
 @Repository
 public class TravelRequestCriteriaDao {
+
     @PersistenceContext
     private EntityManager em;
 

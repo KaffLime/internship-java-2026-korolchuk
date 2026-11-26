@@ -1,12 +1,16 @@
 package com.example.internshipjava2026korolchuk.service;
 
+import com.example.internshipjava2026korolchuk.dto.NotificationRequestDto;
+import com.example.internshipjava2026korolchuk.dto.NotificationResponseDto;
 import com.example.internshipjava2026korolchuk.dto.TravelRequestCreationDto;
 import com.example.internshipjava2026korolchuk.dto.TravelRequestResponseDto;
 import com.example.internshipjava2026korolchuk.dto.TravelRequestUpdatingDto;
+import com.example.internshipjava2026korolchuk.entity.TransferChannel;
 import com.example.internshipjava2026korolchuk.entity.TravelRequest;
 import com.example.internshipjava2026korolchuk.entity.TravelRequestStatus;
 import com.example.internshipjava2026korolchuk.exception.CannotUpdateTravelRequestWithStatusException;
 import com.example.internshipjava2026korolchuk.exception.NotValidDtoException;
+import com.example.internshipjava2026korolchuk.feign.NotificationServiceClient;
 import com.example.internshipjava2026korolchuk.mapper.TravelRequestMapper;
 import com.example.internshipjava2026korolchuk.repository.TravelRequestRepository;
 import com.example.internshipjava2026korolchuk.specification.TravelRequestFilter;
@@ -18,15 +22,18 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.persistence.PersistenceContext;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.concurrent.atomic.AtomicLong;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class TravelRequestService {
@@ -34,6 +41,7 @@ public class TravelRequestService {
     private final TravelRequestRepository travelRequestRepository;
     private final TravelRequestMapper travelRequestMapper;
     private final RequestHistoryService requestHistoryService;
+    private final NotificationServiceClient notificationServiceClient;
 
     private AtomicLong rejectedRequestsCounter;
     private final DistributionSummary requestsDurationSummary = DistributionSummary
@@ -119,6 +127,17 @@ public class TravelRequestService {
 
         TravelRequest savedTravelRequest = travelRequestRepository.save(travelRequest);
         requestHistoryService.createHistoryRecord(travelRequest, oldStatus);
+
+        NotificationRequestDto dto = new NotificationRequestDto(
+                travelRequest.getId(),
+                oldStatus,
+                newStatus,
+                LocalDateTime.now(),
+                TransferChannel.KAFKA
+        );
+
+        NotificationResponseDto response = notificationServiceClient.notificateStatusChange(dto);
+        log.info("Notification service returned dto with id: {}", response.id());
 
         if (newStatus == TravelRequestStatus.REJECTED) {
             rejectedRequestsCounter.incrementAndGet();

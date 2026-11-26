@@ -1,9 +1,11 @@
 package com.example.internshipjava2026korolchuk.service;
 
+import com.example.internshipjava2026korolchuk.dto.NotificationResponseDto;
 import com.example.internshipjava2026korolchuk.dto.RequestHistoryResponseDto;
 import com.example.internshipjava2026korolchuk.entity.RequestHistory;
 import com.example.internshipjava2026korolchuk.entity.TravelRequest;
 import com.example.internshipjava2026korolchuk.entity.TravelRequestStatus;
+import com.example.internshipjava2026korolchuk.feign.NotificationServiceClient;
 import com.example.internshipjava2026korolchuk.mapper.RequestHistoryMapper;
 import com.example.internshipjava2026korolchuk.repository.RequestHistoryRepository;
 import com.example.internshipjava2026korolchuk.specification.RequestHistoryFilter;
@@ -22,6 +24,7 @@ public class RequestHistoryService {
 
     private final RequestHistoryRepository requestHistoryRepository;
     private final RequestHistoryMapper requestHistoryMapper;
+    private final NotificationServiceClient notificationServiceClient;
 
     @Transactional(readOnly = true)
     @Logginable
@@ -30,6 +33,12 @@ public class RequestHistoryService {
         Page<RequestHistory> page = requestHistoryRepository.findAll(spec, pageable);
 
         return page.map(requestHistoryMapper::toDto);
+    }
+
+    @Transactional
+    @Logginable
+    public Page<NotificationResponseDto> getHistoryByTravelRequestId(Long id, Pageable pageable) {
+        return notificationServiceClient.getTravelRequestHistory(id, pageable);
     }
 
     @Transactional(readOnly = true)

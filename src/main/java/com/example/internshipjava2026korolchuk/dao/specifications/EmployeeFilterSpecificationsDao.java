@@ -10,6 +10,7 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 
 public interface EmployeeFilterSpecificationsDao extends JpaRepository<Employee, Long>,
         JpaSpecificationExecutor<Employee> {
+
     @EntityGraph(attributePaths = {"department"})
     Page<Employee> findAll(Specification<Employee> spec, Pageable pageable);
 }
